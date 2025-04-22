@@ -1,0 +1,57 @@
+{
+  "name": "alicia-ia",
+  "version": "1.0.0",
+  "lockfileVersion": 2,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "alicia-ia",
+      "version": "1.0.0",
+      "dependencies": {
+        "@supabase/supabase-js": "^2.49.4",
+        "openai": "^4.95.1",
+        "node-fetch": "^3.3.2"
+      }
+    },
+    "node_modules/@supabase/supabase-js": {
+      "version": "2.49.4",
+      "resolved": "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.49.4.tgz",
+      "integrity": "sha512-...",
+      "dependencies": {
+        "@supabase/auth-js": "2.69.1",
+        "@supabase/functions-js": "2.4.4",
+        "@supabase/postgrest-js": "1.19.4",
+        "@supabase/realtime-js": "2.11.2",
+        "@supabase/storage-js": "2.7.1",
+        "node-fetch": "3.3.2"
+      }
+    },
+    "node_modules/openai": {
+      "version": "4.95.1",
+      "resolved": "https://registry.npmjs.org/openai/-/openai-4.95.1.tgz",
+      "integrity": "sha512-..."
+    },
+    "node_modules/node-fetch": {
+      "version": "3.3.2",
+      "resolved": "https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.2.tgz",
+      "integrity": "sha512-..."
+    }
+  },
+  "dependencies": {
+    "@supabase/supabase-js": {
+      "version": "2.49.4",
+      "resolved": "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.49.4.tgz",
+      "integrity": "sha512-..."
+    },
+    "openai": {
+      "version": "4.95.1",
+      "resolved": "https://registry.npmjs.org/openai/-/openai-4.95.1.tgz",
+      "integrity": "sha512-..."
+    },
+    "node-fetch": {
+      "version": "3.3.2",
+      "resolved": "https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.2.tgz",
+      "integrity": "sha512-..."
+    }
+  }
+}
