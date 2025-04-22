@@ -1,16 +1,12 @@
-/**
- * fsm.js - Finite State Machine para Alicia IA v7.2.0
- */
+// fsm.js - Finite State Machine para Alicia IA v7.2.0
 
-// Estados definidos
-const STATES = {
+export const STATES = {
   IDLE: 'idle',
   LISTENING: 'listening',
   PROCESSING: 'processing',
   SPEAKING: 'speaking'
 };
 
-// Transiciones válidas
 const VALID_TRANSITIONS = {
   [STATES.IDLE]: [STATES.LISTENING],
   [STATES.LISTENING]: [STATES.PROCESSING, STATES.IDLE],
@@ -81,7 +77,6 @@ class FSM {
     document.dispatchEvent(new CustomEvent('fsm-state-change', {
       detail: { from, to, timestamp: new Date().toISOString() }
     }));
-
     document.dispatchEvent(new CustomEvent(`fsm-state-${to}`, {
       detail: { from, to, timestamp: new Date().toISOString() }
     }));
@@ -90,8 +85,6 @@ class FSM {
 
 const fsm = new FSM();
 export default fsm;
-export { STATES };
-
 
 
 
