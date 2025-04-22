@@ -1,7 +1,7 @@
 // main.js - Alicia IA v7.2.0 mínimo funcional
 console.log("Desplegando versión limpia v7.2.0");
 
-import fsm, { STATES } from './fsm.js';
+import fsm, { STATES } from './fsm.core.js';
 import tts from './tts.js';
 import stt from './stt.js';
 
