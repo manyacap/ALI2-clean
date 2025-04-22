@@ -117,11 +117,8 @@ class FSM {
 
 const fsm = new FSM();
 export default fsm;
-export const STATES = {
-  IDLE: 'idle',
-  LISTENING: 'listening',
-  PROCESSING: 'processing',
-  SPEAKING: 'speaking'
-};
+export { STATES }; // ✅ sólo esta línea
+
+
 
 
