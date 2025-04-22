@@ -3,7 +3,7 @@
  */
 
 // Estados definidos
-export const STATES = {
+const STATES = {
   IDLE: 'idle',
   LISTENING: 'listening',
   PROCESSING: 'processing',
@@ -25,62 +25,43 @@ class FSM {
     this.previousState = null;
   }
 
-  /**
-   * Inicializa la máquina de estados
-   */
   async init() {
     console.log('[FSM] Inicializada en estado:', this.currentState);
     this._dispatchStateEvent(null, this.currentState);
     return Promise.resolve();
   }
 
-  /**
-   * Obtiene el estado actual
-   */
   getState() {
     return this.currentState;
   }
 
-  /**
-   * Realiza una transición a un nuevo estado
-   */
   async transitionTo(newState) {
     if (this.isPaused && newState !== STATES.IDLE) {
       console.warn('[FSM] Sistema pausado, solo se permite transición a IDLE');
       return false;
     }
 
-    // Evitar transición al mismo estado
     if (newState === this.currentState) {
       console.warn(`[FSM] Ya en estado: ${newState}`);
       return false;
     }
 
-    // Validar transición
     if (!this._isValidTransition(this.currentState, newState)) {
       console.error(`[FSM] Transición inválida: ${this.currentState} → ${newState}`);
       return false;
     }
 
     console.log(`[FSM] Transición: ${this.currentState} → ${newState}`);
-    
     const previousState = this.currentState;
     this.currentState = newState;
-    
     this._dispatchStateEvent(previousState, newState);
     return true;
   }
 
-  /**
-   * Verifica si una transición es válida
-   */
   _isValidTransition(fromState, toState) {
     return VALID_TRANSITIONS[fromState]?.includes(toState) || false;
   }
 
-  /**
-   * Pausa la FSM (solo permitirá transiciones a IDLE)
-   */
   pause() {
     if (!this.isPaused) {
       this.isPaused = true;
@@ -89,9 +70,6 @@ class FSM {
     }
   }
 
-  /**
-   * Reanuda la FSM
-   */
   resume() {
     if (this.isPaused) {
       this.isPaused = false;
@@ -99,16 +77,11 @@ class FSM {
     }
   }
 
-  /**
-   * Dispatches custom events for state changes
-   */
   _dispatchStateEvent(from, to) {
-    // Evento general de cambio de estado
     document.dispatchEvent(new CustomEvent('fsm-state-change', {
       detail: { from, to, timestamp: new Date().toISOString() }
     }));
-    
-    // Evento específico para el nuevo estado
+
     document.dispatchEvent(new CustomEvent(`fsm-state-${to}`, {
       detail: { from, to, timestamp: new Date().toISOString() }
     }));
@@ -117,7 +90,8 @@ class FSM {
 
 const fsm = new FSM();
 export default fsm;
-export { STATES }; // ✅ sólo esta línea
+export { STATES };
+
 
 
 
