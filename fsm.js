@@ -117,5 +117,11 @@ class FSM {
 
 const fsm = new FSM();
 export default fsm;
-export { STATES };
+export const STATES = {
+  IDLE: 'idle',
+  LISTENING: 'listening',
+  PROCESSING: 'processing',
+  SPEAKING: 'speaking'
+};
+
 
