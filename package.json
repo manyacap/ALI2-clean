@@ -1,0 +1,16 @@
+{
+  "name": "alicia-ia",
+  "version": "7.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "npm ci || npm install"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "openai": "^4.26.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
