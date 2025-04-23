@@ -1,0 +1,8 @@
+// railway.json
+{
+  "build": {
+    "nixpacks": {
+      "nodeVersion": "18.x"
+    }
+  }
+}
