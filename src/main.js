@@ -1,13 +1,14 @@
 // main.js - Integración FSM y flujos básicos de Alicia IA (v7.2.1)
 
-import { createClient } from '@supabase/supabase-js';
+// Importar Supabase desde CDN para compatibilidad directa en navegador móvil/PWA
+import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 import fsmController from './core/fsm/fsm.js';
 import { startRecognition, stopRecognition } from './stt.js';
 import { speakText } from './tts.js';
 import { renderUserMessage, renderAliciaMessage, setupUI } from './ui.js';
 import { chatWithGPT } from './openai.js';
 
-// Configuración Supabase desde objeto global para compatibilidad móvil/directa en WebView
+// Configuración Supabase inyectada globalmente
 const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -31,24 +32,17 @@ function handleSpeechResult(error, transcript) {
 async function processUserInput(text) {
   renderUserMessage(text);
 
-  // Preparamos contexto y transición USER_INPUT
   fsmController.setContext({ userInput: text, isListening: false });
   await fsmController.transition('user_input');
 
-  // Interacción con GPT
   const response = await chatWithGPT(text);
   fsmController.setContext({ response });
 
   await fsmController.transition('response_ready');
-
-  // Síntesis de voz de respuesta
   await speakText(response);
-
   await fsmController.transition('speaking_complete');
 
   renderAliciaMessage(response);
-
-  // Reiniciar reconocimiento luego de hablar
   startRecognition(handleSpeechResult);
 }
 
@@ -63,7 +57,6 @@ async function main() {
     return;
   }
 
-  // Configurar UI y callbacks
   setupUI({
     onActivate: async () => {
       try {
@@ -90,5 +83,5 @@ async function main() {
   });
 }
 
-// Ejecutamos la aplicación
 main().catch(err => console.error('Error en main:', err));
+
