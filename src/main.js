@@ -1,9 +1,9 @@
 // src/main.js
 import fsm, { STATES } from './core/fsm.js';
-import initSTT from '../stt.js';
-import initTTS from '../tts.js';
+import initSTT from './stt.js';   // antes era ../stt.js
+import initTTS from './tts.js';   // antes era ../tts.js
 import { createClient } from '@supabase/supabase-js';
-
+// ...
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
