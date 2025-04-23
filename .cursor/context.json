@@ -1,9 +1,0 @@
-{
-  "projectName": "Alicia IA",
-  "targets": ["mobile", "desktop"],
-  "bundleSizeLimit": 300,
-  "framework": "vanilla",
-  "entry": "index.html",
-  "testVoiceFlow": "/test voice-flow",
-  "optimizations": ["lighthouse-pwa"]
-}
