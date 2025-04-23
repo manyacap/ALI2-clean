@@ -7,63 +7,88 @@ import { speakText } from './tts.js';
 import { renderUserMessage, renderAliciaMessage, setupUI } from './ui.js';
 import { chatWithGPT } from './openai.js';
 
-// Configuración Supabase (variables de entorno en Railway)
-const SUPABASE_URL = import.meta.env.SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.SUPABASE_ANON_KEY;
+// Configuración Supabase desde objeto global para compatibilidad móvil/directa en WebView
+const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Procesar input del usuario y orquestar la FSM + GPT + TTS
+/**
+ * Maneja el resultado de STT y orquesta el flujo de entrada de usuario.
+ */
+function handleSpeechResult(error, transcript) {
+  if (error) {
+    console.error('STT Error:', error);
+    fsmController.transition('processing_error').catch(console.error);
+    return;
+  }
+
+  stopRecognition();
+  processUserInput(transcript).catch(console.error);
+}
+
+/**
+ * Procesa el texto de usuario: FSM → GPT → TTS → UI
+ */
 async function processUserInput(text) {
-  // Renderizar mensaje de usuario
   renderUserMessage(text);
 
-  // Transición: USER_INPUT
-  fsmController.setContext({ userInput: text });
+  // Preparamos contexto y transición USER_INPUT
+  fsmController.setContext({ userInput: text, isListening: false });
   await fsmController.transition('user_input');
 
-  // Llamar a GPT para generar respuesta
+  // Interacción con GPT
   const response = await chatWithGPT(text);
   fsmController.setContext({ response });
 
-  // Transición: RESPONSE_READY
   await fsmController.transition('response_ready');
 
-  // Sintetizar voz
+  // Síntesis de voz de respuesta
   await speakText(response);
 
-  // Transición: SPEAKING_COMPLETE
   await fsmController.transition('speaking_complete');
 
-  // Renderizar mensaje de Alicia
   renderAliciaMessage(response);
+
+  // Reiniciar reconocimiento luego de hablar
+  startRecognition(handleSpeechResult);
 }
 
-// Inicialización general de la aplicación
+/**
+ * Punto de entrada principal de la aplicación
+ */
 async function main() {
-  // Inicializar FSM
-  await fsmController.init();
+  try {
+    await fsmController.init();
+  } catch (err) {
+    console.error('FSM init failed:', err);
+    return;
+  }
 
   // Configurar UI y callbacks
   setupUI({
-    onActivate: () => fsmController.transition('user_activate'),
-    onSpeechResult: async (transcript) => {
-      stopRecognition();
-      await processUserInput(transcript);
+    onActivate: async () => {
+      try {
+        await fsmController.transition('user_activate');
+        startRecognition(handleSpeechResult);
+      } catch (e) {
+        console.error('Activate transition failed:', e);
+      }
     },
-    onConfirmOrder: () => fsmController.transition('user_confirms'),
-    onCancel: () => fsmController.transition('user_cancels')
-  });
-
-  // Escuchar comandos por voz
-  startRecognition((error, transcript) => {
-    if (error) {
-      console.error('STT Error:', error);
-      fsmController.transition('processing_error');
-      return;
+    onConfirmOrder: async () => {
+      try {
+        await fsmController.transition('user_confirms');
+      } catch (e) {
+        console.error('Confirm transition failed:', e);
+      }
+    },
+    onCancel: async () => {
+      try {
+        await fsmController.transition('user_cancels');
+      } catch (e) {
+        console.error('Cancel transition failed:', e);
+      }
     }
-    setupUI().onSpeechResult(transcript);
   });
 }
 
-// Ejecutar
+// Ejecutamos la aplicación
 main().catch(err => console.error('Error en main:', err));
