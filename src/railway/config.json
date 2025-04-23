@@ -1,8 +1,0 @@
-{
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "startCommand": "npm run start",
-  "environment": {
-    "NO_CACHE": "1"
-  }
-}
