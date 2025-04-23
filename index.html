@@ -3,61 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alicia IA Test</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    #message-bubbles {
-      max-width: 600px;
-      margin: 0 auto;
-      background: white;
-      padding: 16px;
-      border-radius: 8px;
-      height: 300px;
-      overflow-y: auto;
-    }
-    .message-bubble {
-      margin: 8px 0;
-      padding: 10px 16px;
-      border-radius: 16px;
-      max-width: 80%;
-    }
-    .message-bubble.system {
-      background-color: #ffe0b2;
-      text-align: center;
-    }
-    .message-bubble.user {
-      background-color: #c8e6c9;
-      align-self: flex-end;
-    }
-    .message-bubble.assistant {
-      background-color: #bbdefb;
-      align-self: flex-start;
-    }
-    #main-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: orange;
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+  <title>Alicia IA</title>
+  <!-- Tu CSS sigue en la raíz -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Alicia IA v7.2.0</h1>
-  <div id="message-bubbles"></div>
-  <button id="main-button">🎤</button>
+  <!-- Avatar fijo en esquina -->
+  <div id="avatar"></div>
 
-  <script type="module" src="./main.js"></script>
+  <!-- Contenedor de chat -->
+  <div id="chat">
+    <div id="messages"></div>
+  </div>
+
+  <!-- Botón para iniciar reconocimiento -->
+  <button id="startBtn">Hablar con Alicia</button>
+
+  <!-- Carga tu lógica principal desde src/ -->
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
+
 
