@@ -1,70 +1,11 @@
 {
-  "name": "alicia-ia",
-"version": "7.2.2",
-
-  "private": true,
+  "name": "alicia-cursor",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "node main.js",
-    "build": "npm install --force"
+    "start": "serve .",
+    "build": "echo \"No build step\""
   },
-  "dependencies": {
-    "@supabase/auth-js": "2.69.1",
-    "@supabase/functions-js": "2.4.4",
-    "@supabase/postgrest-js": "1.19.4",
-    "@supabase/realtime-js": "2.11.2",
-    "@supabase/storage-js": "2.7.1",
-    "@supabase/supabase-js": "2.49.4",
-    "node-fetch": "3.3.2",
-    "openai": "4.95.1",
-    "ws": "8.18.1",
-    "@types/node": "22.14.1",
-    "whatwg-url": "5.0.0",
-    "@types/phoenix": "1.6.6",
-    "@types/ws": "8.18.1",
-    "undici-types": "6.21.0",
-    "data-uri-to-buffer": "4.0.1",
-    "fetch-blob": "3.2.0",
-    "formdata-polyfill": "4.0.10",
-    "node-domexception": "1.0.0",
-    "web-streams-polyfill": "3.3.3",
-    "@types/node-fetch": "2.6.12",
-    "abort-controller": "3.0.0",
-    "agentkeepalive": "4.6.0",
-    "form-data-encoder": "1.7.2",
-    "formdata-node": "4.4.1",
-    "form-data": "4.0.2",
-    "event-target-shim": "5.0.1",
-    "humanize-ms": "1.2.1",
-    "asynckit": "0.4.0",
-    "combined-stream": "1.0.8",
-    "es-set-tostringtag": "2.1.0",
-    "mime-types": "2.1.35",
-    "delayed-stream": "1.0.0",
-    "es-errors": "1.3.0",
-    "get-intrinsic": "1.3.0",
-    "has-tostringtag": "1.0.2",
-    "hasown": "2.0.2",
-    "web-streams-polyfill": "4.0.0-beta.3",
-    "call-bind-apply-helpers": "1.0.2",
-    "es-define-property": "1.0.1",
-    "es-object-atoms": "1.1.1",
-    "function-bind": "1.1.2",
-    "get-proto": "1.0.1",
-    "gopd": "1.2.0",
-    "has-symbols": "1.1.0",
-    "math-intrinsics": "1.1.0",
-    "dunder-proto": "1.0.1",
-    "ms": "2.1.3",
-    "mime-db": "1.52.0",
-    "tr46": "0.0.3",
-    "webidl-conversions": "3.0.1",
-    "undici-types": "5.26.5"
-  },
-  "devDependencies": {
-    "@types/node": "18.19.86"
-  },
-  "engines": {
-    "node": "18.x",
-    "npm": "9.x"
-  }
+  "dependencies": {}
 }
+
