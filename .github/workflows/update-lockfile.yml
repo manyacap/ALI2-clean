@@ -1,9 +1,12 @@
+# .github/workflows/update-lockfile.yml
+
 name: Generate package-lock
 
 on:
   push:
     paths:
       - 'package.json'
+  workflow_dispatch:
 
 jobs:
   update-lock:
