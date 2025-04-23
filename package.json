@@ -1,11 +1,15 @@
 {
-  "name": "alicia-cursor",
-  "version": "1.0.0",
+  "name": "ALI2-clean",
+  "version": "7.2.2",
   "type": "module",
   "scripts": {
     "start": "serve .",
-    "build": "echo \"No build step\""
+    "build": "echo \"No hay paso de build\""
   },
-  "dependencies": {}
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "serve": "^14.0.1"
+  }
 }
-
