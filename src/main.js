@@ -1,55 +1,69 @@
-// src/main.js
-import fsm, { STATES } from './core/fsm.js';
-import initSTT from './stt.js';
-import initTTS from './tts.js';
-// Cargamos Supabase desde un CDN ESM para que funcione en el navegador
-import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+// main.js - Integración FSM y flujos básicos de Alicia IA (v7.2.1)
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+import { createClient } from '@supabase/supabase-js';
+import fsmController from './core/fsm/fsm.js';
+import { startRecognition, stopRecognition } from './stt.js';
+import { speakText } from './tts.js';
+import { renderUserMessage, renderAliciaMessage, setupUI } from './ui.js';
+import { chatWithGPT } from './openai.js';
 
-const recognition = initSTT(onTranscript, onSTTError);
-const tts = initTTS();
+// Configuración Supabase (variables de entorno en Railway)
+const SUPABASE_URL = import.meta.env.SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.SUPABASE_ANON_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('startBtn')
-          .addEventListener('click', startAssistant);
-  fsm.init();
-});
+// Procesar input del usuario y orquestar la FSM + GPT + TTS
+async function processUserInput(text) {
+  // Renderizar mensaje de usuario
+  renderUserMessage(text);
 
-async function startAssistant() {
-  if (await fsm.transitionTo(STATES.LISTENING)) {
-    recognition.start();
-  }
+  // Transición: USER_INPUT
+  fsmController.setContext({ userInput: text });
+  await fsmController.transition('user_input');
+
+  // Llamar a GPT para generar respuesta
+  const response = await chatWithGPT(text);
+  fsmController.setContext({ response });
+
+  // Transición: RESPONSE_READY
+  await fsmController.transition('response_ready');
+
+  // Sintetizar voz
+  await speakText(response);
+
+  // Transición: SPEAKING_COMPLETE
+  await fsmController.transition('speaking_complete');
+
+  // Renderizar mensaje de Alicia
+  renderAliciaMessage(response);
 }
 
-async function onTranscript(text) {
-  if (!await fsm.transitionTo(STATES.PROCESSING)) return;
-  await processWithGPT(text);
-}
+// Inicialización general de la aplicación
+async function main() {
+  // Inicializar FSM
+  await fsmController.init();
 
-async function processWithGPT(text) {
-  try {
-    const res = await fetch('/api/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: text })
-    });
-    const { reply } = await res.json();
+  // Configurar UI y callbacks
+  setupUI({
+    onActivate: () => fsmController.transition('user_activate'),
+    onSpeechResult: async (transcript) => {
+      stopRecognition();
+      await processUserInput(transcript);
+    },
+    onConfirmOrder: () => fsmController.transition('user_confirms'),
+    onCancel: () => fsmController.transition('user_cancels')
+  });
 
-    if (await fsm.transitionTo(STATES.SPEAKING)) {
-      await tts.speak(reply);
+  // Escuchar comandos por voz
+  startRecognition((error, transcript) => {
+    if (error) {
+      console.error('STT Error:', error);
+      fsmController.transition('processing_error');
+      return;
     }
-  } catch (err) {
-    console.error('[GPT] Error:', err);
-  } finally {
-    fsm.transitionTo(STATES.IDLE);
-  }
+    setupUI().onSpeechResult(transcript);
+  });
 }
 
-function onSTTError(err) {
-  console.error('[STT] Error:', err);
-  fsm.transitionTo(STATES.IDLE);
-}
+// Ejecutar
+main().catch(err => console.error('Error en main:', err));
