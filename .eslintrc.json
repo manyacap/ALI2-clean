@@ -3,54 +3,38 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "worker": true
+    "worker": true,
+    "node": true
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "project": "./tsconfig.json",
     "ecmaVersion": 12,
-    "sourceType": "module",
-    "project": "./tsconfig.json"
+    "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "import"
-  ],
+  "plugins": ["@typescript-eslint"],
   "extends": [
-    "airbnb-base",
+    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:import/typescript",
     "prettier"
   ],
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".ts", ".tsx"]
-      }
-    }
-  },
+  "ignorePatterns": ["node_modules/", "dist/"],
   "rules": {
-    /* import/extensions: permite saltarte la extensión en imports */
-    "import/extensions": ["error", "ignorePackages", {
-      "js": "never",
-      "ts": "never",
-      "tsx": "never"
-    }],
-    /* self (en workers) no debe contarse como global peligroso */
-    "no-restricted-globals": ["error", "event", "fdescribe"],
-    /* camelCase privado con guión bajo permitido */
-    "no-underscore-dangle": ["error", {
-      "allow": ["_instance", "_handleClick"]
-    }],
-    /* líneas en blanco entre miembros de clase */
-    "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
-    /* preferir default export si solo exportas uno */
-    "import/prefer-default-export": "off",
-    /* te sugiero desactivar algunos checks TS q no te interesen */
+    // TypeScript
+    "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/no-use-before-define": ["error", { "functions": false, "classes": true }],
-    /* async/await en loops quizá quieras tolerarlo: */
-    "no-await-in-loop": "off",
-    "no-plusplus": "off"
+    "@typescript-eslint/no-unused-expressions": "off",
+
+    // Clases y estilo
+    "class-methods-use-this": "off",
+    "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+
+    // Números mágicos
+    "no-magic-numbers": ["error", { "ignore": [0, 1] }],
+
+    // Reglas generales de ESLint
+    "no-plusplus": "off",
+    "no-await-in-loop": "off"
   }
 }
 
