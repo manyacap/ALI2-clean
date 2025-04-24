@@ -1,7 +1,13 @@
+// src/workers/stt.worker.ts
 /// <reference lib="webworker" />
 import { expose } from 'comlink';
 
-const ctx: Worker = self as any;
+declare const self: any;
+declare const SpeechRecognition: any;
+declare const webkitSpeechRecognition: any;
+
+type WorkerCtx = { postMessage(msg: any): void; };
+const ctx: WorkerCtx = self;
 
 class STTWorker {
   private recognition: any;
@@ -12,13 +18,13 @@ class STTWorker {
   }
 
   private setupRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (!SpeechRecognition) {
-      throw new Error('Speech API no soportada');
+    // Usar SpeechRecognition global sin referirse a window
+    const SR = SpeechRecognition || webkitSpeechRecognition;
+    if (!SR) {
+      throw new Error('SpeechRecognition no soportada en este entorno');
     }
 
-    this.recognition = new SpeechRecognition();
+    this.recognition = new SR();
     this.recognition.lang = 'es-ES';
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
@@ -27,7 +33,6 @@ class STTWorker {
       const transcript = event.results[0][0].transcript;
       ctx.postMessage({ type: 'transcript', data: transcript });
     };
-
     this.recognition.onerror = (event: any) => {
       ctx.postMessage({ type: 'error', error: event.error });
     };
@@ -49,3 +54,5 @@ class STTWorker {
 }
 
 expose(STTWorker, ctx);
+```
+
