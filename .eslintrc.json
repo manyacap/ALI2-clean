@@ -6,26 +6,31 @@
     "worker": true,
     "node": true
   },
-  "plugins": [
-    "import",
-    "@typescript-eslint"
-  ],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ],
   "ignorePatterns": ["node_modules/", "dist/"],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
+  "extends": ["eslint:recommended", "prettier"],
   "rules": {
-    // reglas comunes para TS y JS
-    "no-unused-expressions": "error",
-    "import/no-unresolved": "off"  // si te molesta en .js
+    "import/order": ["error", {
+      "groups": ["builtin","external","internal","parent","sibling","index"],
+      "newlines-between": "always"
+    }]
   },
   "overrides": [
     {
-      // SÓLO para TypeScript
-      "files": ["**/*.ts", "**/*.tsx"],
+      "files": ["**/*.ts","**/*.tsx"],
       "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint","import"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript"
+      ],
       "parserOptions": {
         "project": "./tsconfig.json",
         "ecmaVersion": 2021,
@@ -33,29 +38,24 @@
       },
       "rules": {
         "@typescript-eslint/lines-between-class-members": ["error", "always"],
-        "@typescript-eslint/ban-types": [
+        "@typescript-eslint/ban-types": "error",
+        "@typescript-eslint/no-magic-numbers": [
           "error",
-          {
-            "types": {
-              "Function": "Usa tipos de función concretos, p.ej. `() => void`"
-            },
-            "extendDefaults": true
-          }
+          { "ignoreEnums": true, "ignoreNumericLiteralTypes": true }
         ],
-        "@typescript-eslint/no-explicit-any": "warn",
-        "@typescript-eslint/no-magic-numbers": ["error", { "ignore": [0, 1] }]
+        "@typescript-eslint/no-unused-expressions": "error",
+        "@typescript-eslint/no-unsafe-function-type": "error",
+        "@typescript-eslint/no-explicit-any": "warn"
       }
     },
     {
-      // SÓLO para JavaScript
       "files": ["**/*.js"],
       "parser": "espree",
       "rules": {
-        // desactivo reglas de TS en JS:
-        "@typescript-eslint/lines-between-class-members": "off",
-        "@typescript-eslint/ban-types": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-magic-numbers": "off"
+        "no-unused-expressions": "error",
+        "@typescript-eslint/no-magic-numbers": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off"
       }
     }
   ]
