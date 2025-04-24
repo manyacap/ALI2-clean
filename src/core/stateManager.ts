@@ -1,20 +1,16 @@
 import { wrap, proxy, Remote } from 'comlink';
 import { Workbox } from 'workbox-window';
 
-/**
- * @typedef {'idle'|'listening'|'processing'|'speaking'|'error'} AliciaState
- * @typedef {{ 
- *   from: AliciaState, 
- *   to: AliciaState, 
- *   event: string, 
- *   timestamp: number 
- * }} StateTransition
- * @typedef {{
- *   state: AliciaState,
- *   transitions: StateTransition[],
- *   retries: number
- * }} FSMContext
- */
+// Definición de estados y transiciones
+export type AliciaState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error';
+export interface StateTransition {
+  from: AliciaState;
+  to: AliciaState;
+  event: string;
+  timestamp: number;
+}
+
+type Context = Record<string, any>;
 
 interface WorkerHandlers {
   onStateChange: (state: AliciaState) => void;
@@ -22,172 +18,137 @@ interface WorkerHandlers {
 }
 
 export class AliciaStateManager {
-  private static instance: AliciaStateManager;
-  private currentState: AliciaState = 'idle';
-  private transitions: StateTransition[] = [];
-  private retryCount = 0;
-  private workers = {
-    stt: null as Remote<WorkerHandlers> | null,
-    tts: null as Remote<WorkerHandlers> | null
-  };
+  private static _instance: AliciaStateManager;
+
+  private state: AliciaState = 'idle';
+  private history: StateTransition[] = [];
+  private retries = 0;
   private workbox: Workbox | null = null;
+  private workers: Record<'stt' | 'tts', Remote<WorkerHandlers> | null> = { stt: null, tts: null };
 
   private validTransitions: Record<AliciaState, AliciaState[]> = {
     idle: ['listening'],
     listening: ['processing', 'idle', 'error'],
     processing: ['speaking', 'idle', 'error'],
     speaking: ['idle', 'error'],
-    error: ['idle', 'listening']
+    error: ['idle', 'listening'],
   };
 
   private constructor() {
-    this.setupServiceWorker();
+    this.initServiceWorker();
   }
 
   public static getInstance(): AliciaStateManager {
-    if (!AliciaStateManager.instance) {
-      AliciaStateManager.instance = new AliciaStateManager();
-    }
-    return AliciaStateManager.instance;
+    return this._instance || (this._instance = new AliciaStateManager());
   }
 
-  private async setupServiceWorker() {
+  // Registra el Service Worker si está disponible
+  private async initServiceWorker() {
     if ('serviceWorker' in navigator) {
       this.workbox = new Workbox('/sw.js');
       await this.workbox.register();
     }
   }
 
-  public async connectWorker<T extends Worker>(
-    type: 'stt' | 'tts',
-    worker: T
-  ): Promise<void> {
-    const workerProxy = wrap<WorkerHandlers>(worker);
-    this.workers[type] = workerProxy;
-    
-    await workerProxy.onStateChange(proxy((state: AliciaState) => {
-      this.transition(state, { source: `${type}-worker` });
-    });
+  // Conecta un worker (STT o TTS) y sus handlers
+  public async connectWorker(type: 'stt' | 'tts', worker: Worker): Promise<void> {
+    const proxyWorker = wrap<WorkerHandlers>(worker);
+    this.workers[type] = proxyWorker;
 
-    await workerProxy.onError(proxy((error: Error) => {
-      this.handleError(error, { source: type });
-    });
-  }
-
-  public async transition(
-    newState: AliciaState,
-    context: Record<string, unknown> = {}
-  ): Promise<boolean> {
-    if (!this.isValidTransition(newState)) {
-      this.dispatchEvent('transition-error', { 
-        from: this.currentState,
-        to: newState,
-        context
-      });
-      return false;
-    }
-
-    const transition: StateTransition = {
-      from: this.currentState,
-      to: newState,
-      event: context.event?.toString() || 'manual',
-      timestamp: Date.now()
+    // Iterable de handlers con su evento correspondiente
+    const handlers = {
+      onStateChange: (s: AliciaState) => this.transition(s, { source: `${type}-worker` }),
+      onError: (e: Error) => this.transition('error', { source: type, error: e }),
     };
 
-    this.transitions = [...this.transitions.slice(-9), transition];
-    this.currentState = newState;
+    for (const [evt, handler] of Object.entries(handlers) as Array<['onStateChange' | 'onError', Function]>) {
+      await (proxyWorker as any)[evt]?.(proxy(handler as any));
+    }
+  }
 
-    this.dispatchEvent('statechange', { 
-      detail: transition,
-      context
-    });
+  // Realiza una transición, validando y registrando
+  public async transition(to: AliciaState, context: Context = {}): Promise<boolean> {
+    if (!this.validTransitions[this.state].includes(to)) {
+      return this.emit('transition-error', { from: this.state, to, context });
+    }
 
-    this.handleStateEntry(transition, context);
+    const t: StateTransition = {
+      from: this.state,
+      to,
+      event: context.event?.toString() || 'manual',
+      timestamp: Date.now(),
+    };
+
+    this.history = [...this.history.slice(-9), t];
+    this.state = to;
+    this.emit('statechange', { detail: t, context });
+    this.onStateEntry(t, context);
     return true;
   }
 
-  private handleStateEntry(
-    transition: StateTransition,
-    context: Record<string, unknown>
-  ) {
-    switch (transition.to) {
-      case 'error':
-        this.handleErrorState(context);
+  // Manejo de entradas de estado: timeouts y reintentos
+  private onStateEntry(t: StateTransition, ctx: Context) {
+    switch (t.to) {
+      case 'listening':
+        this.setTimeout('listening', 10000, 'idle', { ...ctx, noSpeech: true });
         break;
       case 'processing':
-        this.setProcessingTimeout();
+        this.setTimeout('processing', 8000, 'error', { ...ctx, timeout: true });
         break;
-      case 'listening':
-        this.setSpeechTimeout();
+      case 'error':
+        this.handleErrorState(ctx);
         break;
     }
   }
 
-  private handleErrorState(context: Record<string, unknown>) {
+  // Timeout genérico para estados
+  private setTimeout(
+    state: AliciaState,
+    ms: number,
+    onExpire: AliciaState,
+    ctx: Context
+  ) {
+    setTimeout(() => {
+      if (this.state === state) this.transition(onExpire, ctx);
+    }, ms);
+  }
+
+  // Lógica de backoff y reintentos en error
+  private handleErrorState(ctx: Context) {
     const maxRetries = 3;
-    const backoff = Math.min(1000 * 2 ** this.retryCount, 30000);
-    
-    if (this.retryCount < maxRetries) {
+    const delay = Math.min(1000 * 2 ** this.retries, 30000);
+
+    if (this.retries < maxRetries) {
       setTimeout(() => {
-        this.retryCount++;
-        this.transition(context.recoverTo || 'idle', {
-          ...context,
-          isRetry: true
-        });
-      }, backoff);
+        this.retries++;
+        this.transition(ctx.recoverTo || 'idle', { ...ctx, isRetry: true });
+      }, delay);
     } else {
-      this.retryCount = 0;
-      this.transition('idle', { ...context, final: true });
+      this.retries = 0;
+      this.transition('idle', { ...ctx, final: true });
     }
   }
 
-  private isValidTransition(newState: AliciaState): boolean {
-    return this.validTransitions[this.currentState].includes(newState);
-  }
-
-  private dispatchEvent(
-    type: string,
-    data: CustomEventInit
-  ): void {
-    const event = new CustomEvent(`alicia:${type}`, {
+  // Emite eventos al DOM y notifica a los workers
+  private emit(type: string, data: CustomEventInit) {
+    document.dispatchEvent(new CustomEvent(`alicia:${type}`, {
       bubbles: true,
-      cancelable: false,
-      detail: {
-        ...data.detail,
-        timestamp: Date.now(),
-        context: data.context
-      }
-    });
+      detail: data.detail || data,
+    }));
 
-    document.dispatchEvent(event);
-    this.workers.stt?.onStateChange?.(this.currentState);
-    this.workers.tts?.onStateChange?.(this.currentState);
+    // Notify workers estado actual
+    Object.values(this.workers).forEach((w) => w?.onStateChange?.(this.state));
+    return false;
   }
 
-  // Mobile optimization timeouts
-  private setProcessingTimeout() {
-    setTimeout(() => {
-      if (this.currentState === 'processing') {
-        this.transition('error', { timeout: true });
-      }
-    }, 8000);
+  // Getters de estado e historial
+  public get current(): AliciaState {
+    return this.state;
   }
-
-  private setSpeechTimeout() {
-    setTimeout(() => {
-      if (this.currentState === 'listening') {
-        this.transition('idle', { noSpeech: true });
-      }
-    }, 10000);
-  }
-
-  public get state(): AliciaState {
-    return this.currentState;
-  }
-
-  public get history(): StateTransition[] {
-    return this.transitions;
+  public get transitionsHistory(): StateTransition[] {
+    return [...this.history];
   }
 }
 
+// Exportamos instancia única
 export const stateManager = AliciaStateManager.getInstance();
