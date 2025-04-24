@@ -1,31 +1,44 @@
 import { wrap } from 'comlink';
 import { FsmController } from './core/fsm';
 import UI from './ui';
+import { speak } from './tts';
 
 async function bootstrap() {
-  // Inicializa tu FSM y la UI
+  // 1) Inicializa FSM y UI
   const fsm = new FsmController();
   UI.init(fsm);
 
-  // Crea y envuelve el worker STT
-  const worker = new Worker(new URL('../workers/stt.worker.ts', import.meta.url), {
-    type: 'module'
-  });
+  // 2) Crea y envuelve el STT Worker
+  const worker = new Worker(
+    new URL('../workers/stt.worker.ts', import.meta.url),
+    { type: 'module' }
+  );
   const STT = wrap<typeof import('../workers/stt.worker').STTWorker>(worker);
   const stt = await new STT();
 
-  // Escucha mensajes del worker
-  worker.addEventListener('message', ev => {
+  // 3) Escucha eventos de transcripción y procesalos
+  worker.addEventListener('message', async ev => {
     if (ev.data.type === 'transcript') {
-      console.log('Transcripción:', ev.data.data);
-      fsm.handle({ type: 'user_said', text: ev.data.data });
+      const userText = ev.data.data as string;
+      console.log('User:', userText);
+
+      // Envía al FSM/GPT y espera respuesta
+      const aiResponse = await fsm.handle({ type: 'user_said', text: userText });
+      console.log('AI:', aiResponse);
+
+      // Muestra burbuja y habla la respuesta
+      UI.addBubble('ai', aiResponse);
+      await speak(aiResponse);
+
+      // Vuelve a escuchar
+      stt.start();
     }
     if (ev.data.type === 'error') {
       console.error('STT error:', ev.data.error);
     }
   });
 
-  // Conecta botones de la UI
+  // 4) Conecta los botones de la UI
   UI.onMicButton(() => stt.start());
   UI.onStopButton(() => stt.stop());
 }
