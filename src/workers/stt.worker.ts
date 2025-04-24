@@ -1,4 +1,4 @@
-```ts
+
 // src/workers/stt.worker.ts
 /// <reference lib="webworker" />
 
