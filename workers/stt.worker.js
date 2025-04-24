@@ -1,32 +1,24 @@
-// Importar polyfills para Safari
-importScripts('https://unpkg.com/@babel/polyfill@7.12.1/dist/polyfill.min.js');
+// src/workers/stt.worker.ts
+/// <reference lib="webworker" />
+import { expose } from 'comlink';
 
-class STTProcessor {
-  constructor() {
-    this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    this.configure();
+const ctx: any = self;
+
+class STTWorker {
+  private rec: any;
+  private listening = false;
+  constructor(){ this.setup(); }
+  private setup(){
+    const g:any = typeof self!=='undefined'?self:globalThis;
+    const SR = g.SpeechRecognition||g.webkitSpeechRecognition;
+    if(!SR) throw new Error('SpeechRecognition no soportada');
+    this.rec=new SR(); this.rec.lang='es-ES'; this.rec.interimResults=false; this.rec.maxAlternatives=1;
+    this.rec.onresult=e=>ctx.postMessage({type:'transcript',data:e.results[0][0].transcript});
+    this.rec.onerror=e=>ctx.postMessage({type:'error',error:e.error});
   }
-
-  configure() {
-    this.recognition.continuous = true;
-    this.recognition.interimResults = true;
-    this.recognition.lang = 'es-ES';
-    
-    this.recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('');
-      self.postMessage({ type: 'transcript', data: transcript });
-    };
-  }
-
-  start() { this.recognition.start(); }
-  stop() { this.recognition.stop(); }
+  public start(){ if(!this.listening){this.rec.start();this.listening=true;}}  
+  public stop(){ if(this.listening){this.rec.stop();this.listening=false;}}
 }
 
-const processor = new STTProcessor();
-
-self.onmessage = (e) => {
-  if (e.data === 'start') processor.start();
-  if (e.data === 'stop') processor.stop();
-};
+expose(STTWorker, ctx);
+```
