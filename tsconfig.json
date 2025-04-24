@@ -8,4 +8,6 @@
   },
   "include": ["src/**/*", "**/*.ts", "**/*.tsx", "**/*.js"],
   "exclude": ["node_modules", "dist"]
+}
+
 
