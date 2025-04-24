@@ -6,8 +6,8 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{js,ts,css,html,json}\"",
     "format": "prettier --write \"src/**/*.{js,ts,css,html,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts,css,html,json}\"",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "start": "serve dist",
@@ -27,10 +27,10 @@
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
     "workbox-cli": "^7.0.0",
-    "eslint": "^8.x",
-    "eslint-config-airbnb-base": "^15.x",
-    "eslint-plugin-import": "^2.x",
-    "eslint-config-prettier": "^8.x",
-    "prettier": "^2.x"
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8"
   }
 }
