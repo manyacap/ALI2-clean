@@ -1,23 +1,30 @@
 name: Debug Docker Build
 
+# Allows both manual runs and on push to main
 on:
+  workflow_dispatch:
   push:
-    # Opcional: limita a la rama donde estás trabajando
     branches: [ main ]
 
 jobs:
-  build:
+  debug-build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Build Docker image (verbose)
+        # Enable BuildKit and force plain (text‐only) logs
         env:
-          DOCKER_BUILDKIT: 0    # desactiva BuildKit para logs “plain”
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
         run: |
           docker build \
             --no-cache \
             --progress=plain \
             -t alicia-ia-debug .
+
+      # (Optionally) you can add a step here to inspect the image, e.g.:
+      # - name: List image layers
+      #   run: docker history alicia-ia-debug
