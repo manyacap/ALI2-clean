@@ -1,24 +1,54 @@
-// src/workers/stt.worker.ts
 /// <reference lib="webworker" />
 import { expose } from 'comlink';
 
-const ctx: any = self;
+type WorkerCtx = {
+  postMessage(msg: any): void;
+};
+const ctx: WorkerCtx = self as any;
 
 class STTWorker {
-  private rec: any;
-  private listening = false;
-  constructor(){ this.setup(); }
-  private setup(){
-    const g:any = typeof self!=='undefined'?self:globalThis;
-    const SR = g.SpeechRecognition||g.webkitSpeechRecognition;
-    if(!SR) throw new Error('SpeechRecognition no soportada');
-    this.rec=new SR(); this.rec.lang='es-ES'; this.rec.interimResults=false; this.rec.maxAlternatives=1;
-    this.rec.onresult=e=>ctx.postMessage({type:'transcript',data:e.results[0][0].transcript});
-    this.rec.onerror=e=>ctx.postMessage({type:'error',error:e.error});
+  private recognition: any;
+  private isListening = false;
+
+  constructor() {
+    this.setupRecognition();
   }
-  public start(){ if(!this.listening){this.rec.start();this.listening=true;}}  
-  public stop(){ if(this.listening){this.rec.stop();this.listening=false;}}
+
+  private setupRecognition() {
+    // forzamos a TS a no quejarse de SpeechRecognition
+    const globalScope: any = (typeof self !== 'undefined' ? self : globalThis);
+    const SR = globalScope.SpeechRecognition || globalScope.webkitSpeechRecognition;
+    if (!SR) {
+      throw new Error('SpeechRecognition no soportada en este entorno');
+    }
+
+    this.recognition = new SR();
+    this.recognition.lang = 'es-ES';
+    this.recognition.interimResults = false;
+    this.recognition.maxAlternatives = 1;
+
+    this.recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      ctx.postMessage({ type: 'transcript', data: transcript });
+    };
+    this.recognition.onerror = (event: any) => {
+      ctx.postMessage({ type: 'error', error: event.error });
+    };
+  }
+
+  public start() {
+    if (!this.isListening) {
+      this.recognition.start();
+      this.isListening = true;
+    }
+  }
+
+  public stop() {
+    if (this.isListening) {
+      this.recognition.stop();
+      this.isListening = false;
+    }
+  }
 }
 
 expose(STTWorker, ctx);
-```
