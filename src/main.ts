@@ -1,46 +1,54 @@
-import { wrap } from 'comlink';
-import { FsmController } from './core/fsm';
 import UI from './ui';
+import { FsmController } from './core/fsm';
 import { speak } from './tts';
+import { STT } from './stt';
 
 async function bootstrap() {
-  // 1) Inicializa FSM y UI
+  // Inicializa FSM y UI
   const fsm = new FsmController();
   UI.init(fsm);
 
-  // 2) Crea y envuelve el STT Worker
-  const worker = new Worker(
-    new URL('../workers/stt.worker.ts', import.meta.url),
-    { type: 'module' }
-  );
-  const STT = wrap<typeof import('../workers/stt.worker').STTWorker>(worker);
-  const stt = await new STT();
+  // Configura reconocimiento de voz
+  let stt: STT;
+  try {
+    stt = new STT();
+  } catch (err) {
+    console.error('STT initialization failed:', err);
+    UI.showError('Reconocimiento de voz no soportado');
+    return;
+  }
 
-  // 3) Escucha eventos de transcripción y procesalos
-  worker.addEventListener('message', async ev => {
-    if (ev.data.type === 'transcript') {
-      const userText = ev.data.data as string;
-      console.log('User:', userText);
+  // Maneja resultados de STT
+  stt.onResult(async (text: string) => {
+    console.log('User said:', text);
+    UI.addBubble('user', text);
 
-      // Envía al FSM/GPT y espera respuesta
-      const aiResponse = await fsm.handle({ type: 'user_said', text: userText });
-      console.log('AI:', aiResponse);
+    // Detén escucha mientras procesas
+    stt.stop();
 
-      // Muestra burbuja y habla la respuesta
+    try {
+      // Envía al FSM / GPT y obtiene respuesta
+      const aiResponse = await fsm.handle({ type: 'user_said', text });
+      console.log('AI response:', aiResponse);
       UI.addBubble('ai', aiResponse);
       await speak(aiResponse);
-
-      // Vuelve a escuchar
+    } catch (err) {
+      console.error('Error processing AI response:', err);
+      UI.showError('Error al procesar la respuesta de la IA');
+    } finally {
+      // Reinicia escucha
       stt.start();
-    }
-    if (ev.data.type === 'error') {
-      console.error('STT error:', ev.data.error);
     }
   });
 
-  // 4) Conecta los botones de la UI
-  UI.onMicButton(() => stt.start());
-  UI.onStopButton(() => stt.stop());
-}
+  // Conecta botones de la UI
+  UI.onMicButton(() => {
+    console.log('Mic button clicked');
+    stt.start();
+  });
 
-bootstrap();
+  UI.onStopButton(() => {
+    console.log('Stop button clicked');
+    stt.stop();
+  });
+}
