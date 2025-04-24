@@ -1,93 +1,59 @@
+// src/components/ChatBubble.ts
 import { stateManager } from '../core/stateManager';
 
+const template = document.createElement('template');
+template.innerHTML = `
+  <style>
+    :host { position: fixed; bottom: 20px; right: 20px; z-index:1000; --size:60px; --color-primary:#2563eb; --color-error:#dc2626; }
+    .bubble { width:var(--size); height:var(--size); border-radius:50%; background:var(--color-primary); cursor:pointer; transition:transform 0.2s; display:grid; place-items:center; }
+    .bubble:active { transform:scale(0.95); }
+    .bubble.error { background:var(--color-error); }
+  </style>
+  <div class="bubble"><slot name="icon"></slot></div>
+`;
+
 export class ChatBubble extends HTMLElement {
-  private shadow: ShadowRoot;
-  private lottiePlayer!: HTMLElement;
+  private shadow = this.attachShadow({ mode: 'open' });
+  private bubble!: HTMLElement;
+  private lottiePlayer?: any;
 
   constructor() {
     super();
-    this.shadow = this.attachShadow({ mode: 'open' });
-    this.render();
+    this.shadow.appendChild(template.content.cloneNode(true));
+    this.bubble = this.shadow.querySelector('.bubble') as HTMLElement;
     this.setupListeners();
   }
 
-  private render(): void {
-    this.shadow.innerHTML = `
-      <style>
-        :host {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          z-index: 1000;
-          --size: 60px;
-          --color-primary: #2563eb;
-          --color-error: #dc2626;
-        }
-        
-        .bubble {
-          width: var(--size);
-          height: var(--size);
-          border-radius: 50%;
-          background: var(--color-primary);
-          cursor: pointer;
-          transition: transform 0.2s;
-          display: grid;
-          place-items: center;
-        }
-        
-        .bubble:active {
-          transform: scale(0.95);
-        }
-        
-        .bubble.error {
-          background: var(--color-error);
-        }
-      </style>
-      
-      <div class="bubble">
-        <slot name="icon"></slot>
-      </div>
-    `;
+  private setupListeners() {
+    this.bubble.addEventListener('click', this.handleToggle);
+    document.addEventListener('alicia:statechange', this.handleStateChange);
   }
 
-  private setupListeners(): void {
-    this.addEventListener('click', this.handleToggle);
-    
-    document.addEventListener('alicia:statechange', (event) => {
-      const { detail } = event as CustomEvent<{ to: string }>;
-      this.updateState(detail.to);
-    });
-  }
+  private handleStateChange = (evt: Event) => {
+    const { to } = (evt as CustomEvent<{to:string}>).detail;
+    this.bubble.classList.toggle('error', to === 'error');
+    to === 'processing' ? this.startLoader() : this.stopLoader();
+  };
 
-  private updateState(state: string): void {
-    const bubble = this.shadow.querySelector('.bubble')!;
-    bubble.classList.toggle('error', state === 'error');
-    
-    if (state === 'processing') {
-      this.startLoader();
-    } else {
-      this.stopLoader();
-    }
-  }
-
-  private startLoader(): void {
+  private startLoader() {
     if (!this.lottiePlayer) {
       this.lottiePlayer = document.createElement('lottie-player');
-      this.lottiePlayer.setAttribute('src', '/animations/loading.json');
-      this.lottiePlayer.setAttribute('speed', '1.5');
+      this.lottiePlayer.src = '/animations/loading.json';
+      this.lottiePlayer.speed = 1.5;
       this.shadow.appendChild(this.lottiePlayer);
     }
     this.lottiePlayer.play();
   }
 
-  private stopLoader(): void {
+  private stopLoader() {
     this.lottiePlayer?.stop();
   }
 
-  private handleToggle(): void {
-    const newState = stateManager.state === 'listening' ? 'idle' : 'listening';
-    stateManager.transition(newState, { source: 'bubble-click' });
-  }
+  private handleToggle = () => {
+    const next = stateManager.state === 'listening' ? 'idle' : 'listening';
+    stateManager.transition(next as any, { source: 'bubble-click' });
+  };
 }
 
 customElements.define('chat-bubble', ChatBubble);
+
