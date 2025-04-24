@@ -1,16 +1,19 @@
 // src/main.js
 
-// Registra tu componente web
+// 1) Importa todo lo primero
 import './components/ChatBubble';
+import { Workbox } from 'workbox-window';
+import { stateManager } from './core/stateManager';
 
-// (Opcional) Arranca el service worker
-// import { Workbox } from 'workbox-window';
-// if ('serviceWorker' in navigator) new Workbox('/sw.js').register();
+// 2) Registra el service worker
+if ('serviceWorker' in navigator) {
+  const wb = new Workbox('/sw.js');
+  wb.register();
+}
 
-// Inserta el <chat-bubble> en el body
+// 3) Añade el chat-bubble al body
 const bubble = document.createElement('chat-bubble');
 document.body.appendChild(bubble);
 
-// (Opcional) inicia el primer estado
-import { stateManager } from './core/stateManager';
+// 4) Inicia el estado inicial
 stateManager.transition('idle');
