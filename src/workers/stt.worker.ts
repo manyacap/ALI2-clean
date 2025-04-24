@@ -58,5 +58,5 @@ class STTWorker {
 
 // Exponer la clase al exterior del worker
 expose(STTWorker, ctx);
-```
+
 
