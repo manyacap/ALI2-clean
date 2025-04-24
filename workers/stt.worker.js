@@ -1,13 +1,8 @@
 /// <reference lib="webworker" />
-import { expose } from 'comlink/dist/esm/comlink';
-
-type WorkerCtx = {
-  postMessage(msg: any): void;
-};
-const ctx: WorkerCtx = self as any;
+import { expose } from 'comlink';
 
 class STTWorker {
-  private recognition: any;
+  private recognition: SpeechRecognition;
   private isListening = false;
 
   constructor() {
@@ -15,24 +10,20 @@ class STTWorker {
   }
 
   private setupRecognition() {
-    // forzamos a TS a no quejarse de SpeechRecognition
-    const globalScope: any = (typeof self !== 'undefined' ? self : globalThis);
+    const globalScope = self as any;
     const SR = globalScope.SpeechRecognition || globalScope.webkitSpeechRecognition;
-    if (!SR) {
-      throw new Error('SpeechRecognition no soportada en este entorno');
-    }
+    if (!SR) throw new Error('SpeechRecognition no soportada');
 
     this.recognition = new SR();
     this.recognition.lang = 'es-ES';
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
 
-    this.recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      ctx.postMessage({ type: 'transcript', data: transcript });
+    this.recognition.onresult = (ev: SpeechRecognitionEvent) => {
+      (self as DedicatedWorkerGlobalScope).postMessage({ type: 'transcript', data: ev.results[0][0].transcript });
     };
-    this.recognition.onerror = (event: any) => {
-      ctx.postMessage({ type: 'error', error: event.error });
+    this.recognition.onerror = (ev: any) => {
+      (self as DedicatedWorkerGlobalScope).postMessage({ type: 'error', error: ev.error });
     };
   }
 
@@ -51,4 +42,4 @@ class STTWorker {
   }
 }
 
-expose(STTWorker, ctx);
+expose(STTWorker);

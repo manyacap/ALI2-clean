@@ -1,9 +1,9 @@
-import lottie from 'https://cdn.skypack.dev/lottie-web';
+import lottie from "https://cdn.skypack.dev/lottie-web";
 
 const ANIMATIONS = {
-  listening: 'https://assets8.lottiefiles.com/datafiles/abc.json',
-  processing: 'https://assets4.lottiefiles.com/datafiles/def.json',
-  idle: 'https://assets2.lottiefiles.com/datafiles/ghi.json'
+  listening: "https://assets8.lottiefiles.com/datafiles/abc.json",
+  processing: "https://assets4.lottiefiles.com/datafiles/def.json",
+  idle: "https://assets2.lottiefiles.com/datafiles/ghi.json",
 };
 
 export class AvatarManager {
@@ -22,18 +22,18 @@ export class AvatarManager {
   }
 
   supportsLottie() {
-    return 'requestIdleCallback' in window && !navigator.connection?.saveData;
+    return "requestIdleCallback" in window && !navigator.connection?.saveData;
   }
 
   async loadLottie(url) {
     if (this.currentAnim) this.currentAnim.destroy();
-    
+
     this.currentAnim = lottie.loadAnimation({
       container: this.container,
-      renderer: 'svg',
+      renderer: "svg",
       loop: true,
       autoplay: true,
-      path: url
+      path: url,
     });
   }
 

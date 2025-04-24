@@ -1,4 +1,4 @@
-const template = document.createElement('template');
+const template = document.createElement("template");
 template.innerHTML = `
   <style>
     :host {
@@ -17,15 +17,15 @@ template.innerHTML = `
 class ChatBubble extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(template.content.cloneNode(true));
   }
 
   set type(value) {
-    this.setAttribute('type', value);
-    this.shadowRoot.host.style.backgroundColor = 
-      value === 'user' ? 'var(--user-bubble)' : 'var(--ai-bubble)';
+    this.setAttribute("type", value);
+    this.shadowRoot.host.style.backgroundColor =
+      value === "user" ? "var(--user-bubble)" : "var(--ai-bubble)";
   }
 }
 
-customElements.define('chat-bubble', ChatBubble);
+customElements.define("chat-bubble", ChatBubble);

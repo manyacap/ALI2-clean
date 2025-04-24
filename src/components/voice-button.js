@@ -10,15 +10,17 @@ class VoiceButton extends HTMLElement {
   }
 
   connectedCallback() {
-    this.querySelector('button').addEventListener('click', this._handleClick);
+    this.querySelector("button").addEventListener("click", this._handleClick);
   }
 
   _handleClick() {
-    this.dispatchEvent(new CustomEvent('voice-toggle', {
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent("voice-toggle", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 
-customElements.define('voice-button', VoiceButton);
+customElements.define("voice-button", VoiceButton);

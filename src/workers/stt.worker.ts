@@ -1,4 +1,4 @@
-import { expose } from 'comlink';
+import { expose } from "comlink";
 
 const ctx: any = self;
 
@@ -11,18 +11,19 @@ class STTWorker {
   }
 
   private setup() {
-    const g: any = typeof self !== 'undefined' ? self : globalThis;
+    const g: any = typeof self !== "undefined" ? self : globalThis;
     const SR = g.SpeechRecognition || g.webkitSpeechRecognition;
-    if (!SR) throw new Error('SpeechRecognition no soportada');
+    if (!SR) throw new Error("SpeechRecognition no soportada");
 
     this.rec = new SR();
-    this.rec.lang = 'es-ES';
+    this.rec.lang = "es-ES";
     this.rec.interimResults = false;
     this.rec.maxAlternatives = 1;
 
     this.rec.onresult = (e: any) =>
-      ctx.postMessage({ type: 'transcript', data: e.results[0][0].transcript });
-    this.rec.onerror = (e: any) => ctx.postMessage({ type: 'error', error: e.error });
+      ctx.postMessage({ type: "transcript", data: e.results[0][0].transcript });
+    this.rec.onerror = (e: any) =>
+      ctx.postMessage({ type: "error", error: e.error });
   }
 
   public start() {
