@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { expose } from 'comlink';
+import { expose } from 'comlink/dist/esm/comlink';
 
 type WorkerCtx = {
   postMessage(msg: any): void;
