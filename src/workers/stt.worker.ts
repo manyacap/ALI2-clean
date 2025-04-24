@@ -1,12 +1,14 @@
+```ts
 // src/workers/stt.worker.ts
 /// <reference lib="webworker" />
+
 import { expose } from 'comlink';
 
 declare const self: any;
 declare const SpeechRecognition: any;
 declare const webkitSpeechRecognition: any;
 
-type WorkerCtx = { postMessage(msg: any): void; };
+type WorkerCtx = { postMessage(msg: any): void };
 const ctx: WorkerCtx = self;
 
 class STTWorker {
@@ -33,6 +35,7 @@ class STTWorker {
       const transcript = event.results[0][0].transcript;
       ctx.postMessage({ type: 'transcript', data: transcript });
     };
+
     this.recognition.onerror = (event: any) => {
       ctx.postMessage({ type: 'error', error: event.error });
     };
@@ -53,6 +56,7 @@ class STTWorker {
   }
 }
 
+// Exponer la clase al exterior del worker
 expose(STTWorker, ctx);
 ```
 
