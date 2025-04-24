@@ -5,8 +5,7 @@
     "worker": true
   },
   "extends": [
-    "eslint:recommended",
-    "plugin:import/recommended",
+    "airbnb-base",
     "prettier"
   ],
   "plugins": ["import"],
