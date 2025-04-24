@@ -1,5 +1,6 @@
 import { wrap, proxy, Remote } from 'comlink';
 import { Workbox } from 'workbox-window';
+import { TIMEOUTS } from '../config/constants';
 
 export type AliciaState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error';
 export interface StateTransition { from: AliciaState; to: AliciaState; event: string; timestamp: number; }
@@ -64,8 +65,12 @@ export class AliciaStateManager {
   }
 
   private handleEntry(t: StateTransition, ctx: Context) {
-    if (t.to === 'listening') this.schedule('listening', 10000, 'idle', { ...ctx, noSpeech: true });
-    if (t.to === 'processing') this.schedule('processing', 8000, 'error', { ...ctx, timeout: true });
+    if (t.to === 'listening') {
+      this.schedule('listening', TIMEOUTS.STT_LISTENING_MS, 'idle', { ...ctx, noSpeech: true });
+    }
+    if (t.to === 'processing') {
+      this.schedule('processing', TIMEOUTS.STT_PROCESSING_MS, 'error', { ...ctx, timeout: true });
+    }
     if (t.to === 'error') this.retry(ctx);
   }
 
@@ -74,10 +79,16 @@ export class AliciaStateManager {
   }
 
   private retry(ctx: Context) {
-    const max = 3;
-    const delay = Math.min(1000 * 2 ** this.retries, 30000);
-    if (this.retries < max) {
-      setTimeout(() => { this.retries++; this.transition(ctx.recoverTo || 'idle', { ...ctx, isRetry: true }); }, delay);
+    const maxAttempts = 3;
+    const delay = Math.min(
+      TIMEOUTS.RETRY_BASE_DELAY_MS * 2 ** this.retries,
+      TIMEOUTS.RETRY_MAX_DELAY_MS
+    );
+    if (this.retries < maxAttempts) {
+      setTimeout(() => {
+        this.retries++;
+        this.transition(ctx.recoverTo || 'idle', { ...ctx, isRetry: true });
+      }, delay);
     } else {
       this.retries = 0;
       this.transition('idle', { ...ctx, final: true });
@@ -92,4 +103,5 @@ export class AliciaStateManager {
   public get state() { return this.currentState; }
   public get historyLog() { return [...this.history]; }
 }
+
 export const stateManager = AliciaStateManager.getInstance();
