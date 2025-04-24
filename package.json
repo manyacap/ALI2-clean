@@ -7,8 +7,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-   "start": "serve dist"
-
+    "start": "serve dist",
     "generate-sw": "workbox generateSW workbox-config.js",
     "predeploy": "npm run generate-sw"
   },
@@ -17,13 +16,13 @@
     "comlink": "^4.4.1",
     "idb": "^7.1.1",
     "lottie-web": "^5.10.4",
-    "workbox-window": "^7.0.0"
+    "workbox-window": "^7.0.0",
+    "serve": "^14.2.4"
   },
   "devDependencies": {
     "@types/web": "^0.0.100",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
-    "workbox-cli": "^7.0.0",
-    "serve": "^14.2.4"
+    "workbox-cli": "^7.0.0"
   }
 }
