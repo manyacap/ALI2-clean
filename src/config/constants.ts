@@ -1,0 +1,8 @@
+// src/config/constants.ts
+export const TIMEOUTS = {
+  STT_LISTENING_MS: 10000,
+  STT_PROCESSING_MS: 8000,
+  TTS_SPEECH_MS: 30000,
+  RETRY_BASE_DELAY_MS: 1000,
+  RETRY_MAX_DELAY_MS: 30000,
+} as const;
