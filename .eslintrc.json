@@ -1,3 +1,4 @@
+// .eslintrc.json
 {
   "root": true,
   "env": {
@@ -6,7 +7,7 @@
     "worker": true,
     "node": true
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "import"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -14,32 +15,38 @@
   ],
   "ignorePatterns": ["node_modules/", "dist/"],
   "rules": {
-    "@typescript-eslint/no-magic-numbers": "error",
-    "@typescript-eslint/lines-between-class-members": ["error", "always"],
-    "@typescript-eslint/ban-types": [
-      "error",
-      {
-        "types": {
-          "Function": "Usa tipos de función concretos, p.ej. `() => void`"
-        },
-        "extendDefaults": true
-      }
-    ]
+    // reglas globales mixtas TS/JS
+    "@typescript-eslint/no-magic-numbers": "error"
   },
   "overrides": [
     {
+      // Sólo para TS/TSX
       "files": ["**/*.ts", "**/*.tsx"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": "./tsconfig.json",
         "ecmaVersion": 12,
         "sourceType": "module"
+      },
+      "rules": {
+        "@typescript-eslint/lines-between-class-members": ["error", "always"],
+        "@typescript-eslint/ban-types": [
+          "error",
+          {
+            "types": {
+              "Function": "Usa tipos de función concretos, p.ej. `() => void`"
+            },
+            "extendDefaults": true
+          }
+        ]
       }
     },
     {
+      // Sólo para JS
       "files": ["**/*.js"],
       "parser": "espree",
       "rules": {
+        // desactivo reglas TS en JS
         "@typescript-eslint/no-magic-numbers": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-member-access": "off"
@@ -47,5 +54,6 @@
     }
   ]
 }
+
 
 
