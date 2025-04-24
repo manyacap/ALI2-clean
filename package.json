@@ -1,4 +1,4 @@
-import {
+{
   "name": "alicia-ia",
   "version": "7.3.0",
   "type": "module",
@@ -27,5 +27,3 @@ import {
   }
 }
 
-// Exponer la clase STTWorker al worker global
-expose(STTWorker);
