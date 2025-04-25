@@ -1,3 +1,4 @@
+// src/main.ts
 import UI from './ui';
 import { FsmController } from './core/fsm';
 import { speak } from './tts';
@@ -51,4 +52,14 @@ async function bootstrap() {
     console.log('Stop button clicked');
     stt.stop();
   });
+
+  // Registra Service Worker solo en producción
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(err => console.error('SW registration failed:', err));
+  }
 }
+
+bootstrap();
