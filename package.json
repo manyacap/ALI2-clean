@@ -13,7 +13,7 @@
     "format": "prettier --write \"src/**/*.{js,ts,css,html,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,css,html,json}\"",
     "check": "npm run typecheck && npm run lint && npm run format:check",
-    "generate-sw": "npx workbox-cli generateSW --config workbox-config.cjs",
+    "generate-sw": "npx workbox generateSW --config workbox-config.js",
     "predeploy": "npm run generate-sw",
     "clean": "rimraf dist",
     "prepare": "husky install"
@@ -50,3 +50,4 @@
     ]
   }
 }
+
