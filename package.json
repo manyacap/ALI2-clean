@@ -27,6 +27,7 @@
     "serve": "^14.2.4"
   },
   "devDependencies": {
+    "@types/dom-speech-recognition": "^0.0.1",
     "@types/web": "^0.0.100",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
@@ -50,5 +51,6 @@
     ]
   }
 }
+
 
 
