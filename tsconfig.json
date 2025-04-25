@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "NodeNext",
-    "lib": ["ES2020", "DOM"],
-    "moduleResolution": "NodeNext",
-    "skipLibCheck": true
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "types": ["dom", "dom-speech-recognition"]
   },
-  "include": ["src/**/*", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
-
