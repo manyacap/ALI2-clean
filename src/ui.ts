@@ -1,37 +1,40 @@
-// src/ui.ts
-// Stub de interfaz de usuario para inicializar y manejar eventos
+// src/main.ts
+import UI from './ui.ts';
+import { FsmController } from './core/fsm.ts';
+import { speak } from './tts.ts';
+import { STT } from './stt.ts';
 
-type Role = 'user' | 'ai';
+async function bootstrap() {
+  const fsm = new FsmController();
+  UI.init(fsm);
 
-const UI = {
-  // Inicializa la UI con tu controlador FSM
-  init: (fsm: any): void => {
-    console.log('UI initialized with FSM', fsm);
-  },
-
-  // Añade una burbuja de chat (usuario o IA)
-  addBubble: (role: Role, text: string): void => {
-    console.log(`[${role}] ${text}`);
-    // Aquí iría la lógica de mostrar en HTML
-  },
-
-  // Muestra un mensaje de error en pantalla
-  showError: (msg: string): void => {
-    console.error('UI Error:', msg);
-    // Lógica de mostrar notificación de error
-  },
-
-  // Evento para cuando se pulsa el botón de Micrófono
-  onMicButton: (callback: () => void): void => {
-    const btn = document.getElementById('mic-btn');
-    if (btn) btn.addEventListener('click', callback);
-  },
-
-  // Evento para cuando se pulsa el botón de Parar
-  onStopButton: (callback: () => void): void => {
-    const btn = document.getElementById('stop-btn');
-    if (btn) btn.addEventListener('click', callback);
+  let stt: STT;
+  try {
+    stt = new STT();
+  } catch (err) {
+    console.error('STT init failed:', err);
+    UI.showError('Reconocimiento de voz no soportado');
+    return;
   }
-};
 
-export default UI;
+  stt.onResult(async (text: string) => {
+    UI.addBubble('user', text);
+    stt.stop();
+
+    try {
+      const aiResponse = await fsm.handle({ type: 'user_said', text });
+      UI.addBubble('ai', aiResponse);
+      await speak(aiResponse);
+    } catch (e) {
+      console.error('Error processing AI response:', e);
+      UI.showError('Error procesando la IA');
+    } finally {
+      stt.start();
+    }
+  });
+
+  UI.onMicButton(() => stt.start());
+  UI.onStopButton(() => stt.stop());
+}
+
+bootstrap();
