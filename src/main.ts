@@ -1,6 +1,6 @@
 // src/main.ts
 import UI from './ui.ts';
-import { FsmController } from './core/fsm.ts';
+import UI from './ui.ts';
 import { speak } from './tts.ts';
 import { STT } from './stt.ts';
 
