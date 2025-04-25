@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alicia IA</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    #app { width: 100%; max-width: 600px; height: 60vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+    button { margin: 0 5px; padding: 10px 20px; font-size: 1rem; }
+  </style>
 </head>
 <body>
-
-  <!-- 1. Botón de inicio -->
-  <button id="startBtn" class="start-btn">Hablar con Alicia</button>
-
-  <!-- 2. Contenedor de chat -->
-  <div id="chat-container" class="chat-container">
-    <div id="messages" class="messages"></div>
+  <div id="app"></div>
+  <div>
+    <button id="mic-btn">🎤 Iniciar</button>
+    <button id="stop-btn">⏹ Detener</button>
   </div>
-
-  <!-- Entrypoint: apunta al src/main.js real -->
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
