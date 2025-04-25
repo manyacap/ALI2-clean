@@ -53,12 +53,19 @@ async function bootstrap() {
     stt.stop();
   });
 
-  // Registra Service Worker solo en producción
-  if ('serviceWorker' in navigator && import.meta.env.PROD) {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then(() => console.log('SW registered'))
-      .catch(err => console.error('SW registration failed:', err));
+    // Unregister SW in development and register only in production
+  if ('serviceWorker' in navigator) {
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker.getRegistrations()
+        .then(regs => regs.forEach(reg => reg.unregister()))
+        .catch(err => console.error('Error unregistering SW:', err));
+    }
+    if (import.meta.env.PROD) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.error('SW registration failed:', err));
+    }
   }
 }
 
