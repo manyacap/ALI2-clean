@@ -1,6 +1,6 @@
 import { wrap, proxy, Remote } from 'comlink';
 import { Workbox } from 'workbox-window';
-import { TIMEOUTS } from '../config/constants';
+import { TIMEOUTS } from '../config/constants.ts';
 
 export type AliciaState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error';
 
