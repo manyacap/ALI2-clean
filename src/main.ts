@@ -1,46 +1,41 @@
-/// <reference types="dom-speech-recognition" />
-/// <reference lib="dom" />
+// src/main.ts
+import UI from './ui.ts';
+import { FsmController } from './core/fsm.ts';
+import { speak } from './tts.ts';
+import { STT } from './stt.ts';
 
-export class STT {
-  private recognition: SpeechRecognition;
-  private isListening = false;
+async function bootstrap() {
+  const fsm = new FsmController();
+  UI.init(fsm);
 
-  constructor() {
-    const globalScope = window as any;
-    const SR = globalScope.SpeechRecognition || globalScope.webkitSpeechRecognition;
-    if (!SR) {
-      throw new Error('SpeechRecognition no soportada');
+  let stt: STT;
+  try {
+    stt = new STT();
+  } catch (err) {
+    console.error('STT init failed:', err);
+    UI.showError('Reconocimiento de voz no soportado');
+    return;
+  }
+
+  stt.onResult(async (text: string) => {
+    UI.addBubble('user', text);
+    stt.stop();
+
+    let aiResponse: string;
+    try {
+      aiResponse = await fsm.handle({ type: 'user_said', text });
+      UI.addBubble('ai', aiResponse);
+      await speak(aiResponse);
+    } catch (e) {
+      console.error(e);
+      UI.showError('Error procesando la IA');
+    } finally {
+      stt.start();
     }
-    this.recognition = new SR();
-    this.recognition.lang = 'es-ES';
-    this.recognition.interimResults = false;
-    this.recognition.maxAlternatives = 1;
-  }
+  });
 
-  /** Registra un callback que recibe cada transcripción finalizada */
-  public onResult(callback: (text: string) => void): void {
-    this.recognition.onresult = (ev: SpeechRecognitionEvent) => {
-      const transcript = ev.results[0][0].transcript;
-      callback(transcript);
-    };
-    this.recognition.onerror = (ev: SpeechRecognitionErrorEvent) => {
-      console.error('STT error:', ev.error);
-    };
-  }
-
-  /** Inicia la escucha de voz */
-  public start(): void {
-    if (!this.isListening) {
-      this.recognition.start();
-      this.isListening = true;
-    }
-  }
-
-  /** Detiene la escucha de voz */
-  public stop(): void {
-    if (this.isListening) {
-      this.recognition.stop();
-      this.isListening = false;
-    }
-  }
+  UI.onMicButton(() => stt.start());
+  UI.onStopButton(() => stt.stop());
 }
+
+bootstrap();
