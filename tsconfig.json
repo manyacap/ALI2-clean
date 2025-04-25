@@ -1,16 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-   {
-  "compilerOptions": {
--   "module": "ESNext",
-+   "module": "nodenext",
--   "moduleResolution": "bundler",
-+   "moduleResolution": "nodenext",
-    // resto igual…
-  }
-}
-
+    "module": "nodenext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
