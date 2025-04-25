@@ -1,6 +1,6 @@
 // src/main.ts
 import UI from './ui.ts';
-import UI from './ui.ts';
+import { FsmController } from './core/fsm.ts';
 import { speak } from './tts.ts';
 import { STT } from './stt.ts';
 
@@ -26,7 +26,7 @@ async function bootstrap() {
       UI.addBubble('ai', aiResponse);
       await speak(aiResponse);
     } catch (e) {
-      console.error('Error processing AI response:', e);
+      console.error('Error procesando la IA:', e);
       UI.showError('Error procesando la IA');
     } finally {
       stt.start();
@@ -38,3 +38,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+
