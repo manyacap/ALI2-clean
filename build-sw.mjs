@@ -11,8 +11,8 @@ async function buildServiceWorker() {
     skipWaiting: true,
   });
 
-  warnings.forEach(warn => console.warn(warn));
-  console.log(`Generated ${count} files, totaling ${size} bytes.`);
+  warnings.forEach(w => console.warn(w));
+  console.log(`✔ Generated ${count} files, totaling ${size} bytes.`);
 }
 
 buildServiceWorker().catch(err => {
