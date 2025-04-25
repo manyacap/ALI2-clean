@@ -1,14 +1,16 @@
 // src/main.ts
-import UI from './ui.ts';
-import { FsmController } from './core/fsm.ts';
-import { speak } from './tts.ts';
-import { STT } from './stt.ts';
+import UI from './ui/index.js';
+import { FsmController } from './core/fsm.js';
+import { speak } from './tts.js';
+import { STT } from './stt.js';
 
 async function bootstrap() {
+  // Inicializa FSM y UI
   const fsm = new FsmController();
   UI.init(fsm);
 
-  let stt: STT;
+  // Configura STT sin worker
+  let stt;
   try {
     stt = new STT();
   } catch (err) {
@@ -17,23 +19,24 @@ async function bootstrap() {
     return;
   }
 
-  stt.onResult(async (text: string) => {
+  // Maneja resultados de reconocimiento
+  stt.onResult(async (text) => {
     UI.addBubble('user', text);
     stt.stop();
 
-    let aiResponse: string;
     try {
-      aiResponse = await fsm.handle({ type: 'user_said', text });
+      const aiResponse = await fsm.handle({ type: 'user_said', text });
       UI.addBubble('ai', aiResponse);
       await speak(aiResponse);
     } catch (e) {
-      console.error(e);
+      console.error('Error processing AI response:', e);
       UI.showError('Error procesando la IA');
     } finally {
       stt.start();
     }
   });
 
+  // Conecta botones
   UI.onMicButton(() => stt.start());
   UI.onStopButton(() => stt.stop());
 }
