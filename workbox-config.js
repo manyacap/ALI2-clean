@@ -1,22 +1,48 @@
 // workbox-config.js
 
 module.exports = {
-  // Directorio donde está tu build de producción
+  // Directorio base de tu build (OUTPUT) de producción
   globDirectory: 'dist/',
-  // Patrón de los archivos que sí quieres cachear
+  // Patrón de los archivos que sí quieres precachear
   globPatterns: [
     '**/*.{html,js,css,png,svg,json}'
   ],
-  // Ignora específicamente el CSS que no existe en tu build
+  // Ignora específicamente los ficheros que no existen
   globIgnores: [
     'styles/main.css'
   ],
-  // Donde se generará el service worker
+  // Ruta donde se generará el service worker
   swDest: 'dist/sw.js',
-  // Opciones para que el SW tome control inmediatamente
+  // Para que el SW tome el control de las páginas inmediatamente
   clientsClaim: true,
   skipWaiting: true,
-  // Si hace falta, puedes añadir runtime caching aquí
-  // runtimeCaching: [ ... ]
+  // Puedes añadir caching en tiempo de ejecución si lo necesitas
+  runtimeCaching: [
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'images',
+        expiration: {
+          maxEntries: 60,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 días
+        },
+      },
+    },
+    {
+      urlPattern: /^https:\/\/api\.tuservicio\.com\//,
+      handler: 'NetworkFirst',
+      options: {
+        networkTimeoutSeconds: 10,
+        cacheName: 'api',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60, // 5 minutos
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+  ],
 };
-
