@@ -1,4 +1,4 @@
-import { stateManager } from "../core/stateManager";
+import { stateManager } from "../core/stateManager.ts";
 
 const template = document.createElement("template");
 template.innerHTML = `
