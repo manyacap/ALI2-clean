@@ -1,20 +1,10 @@
-// workbox-config.js
+// workbox-config.cjs
 module.exports = {
-  globDirectory: 'dist/',
-  globPatterns: ['**/*.{html,js,css,png,svg,json}'],
-  globIgnores: ['styles/main.css'],
+  globDirectory: 'dist',
+  globPatterns: [
+    '**/*.{js,css,html,png,svg,woff2}'
+  ],
   swDest: 'dist/sw.js',
-  clientsClaim: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'images',
-        expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 }
-      }
-    }
-  ]
+  // ✏️ Esta línea es la clave:
+  navigateFallback: 'index.html',
 };
-
