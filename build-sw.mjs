@@ -1,16 +1,14 @@
-// build-sw.mjs
-import { generateSW } from 'workbox-build';
-
-(async () => {
-  const { count, size, warnings } = await generateSW({
-    globDirectory: 'dist',
-    globPatterns: ['**/*.{html,js,css,png,svg,json}'],
-    globIgnores: ['styles/main.css'],
-    swDest: 'dist/sw.js',
-    clientsClaim: true,
-    skipWaiting: true,
-  });
-
-  warnings.forEach(w => console.warn(w));
-  console.log(`✔ Generated ${count} files, totaling ${size} bytes.`);
-})();
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "types": ["dom", "dom-speech-recognition"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
