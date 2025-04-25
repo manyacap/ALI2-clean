@@ -1,72 +1,41 @@
 // src/main.ts
-import UI from './ui';
-import { FsmController } from './core/fsm';
-import { speak } from './tts';
-import { STT } from './stt';
+import UI from './ui.js';
+import { FsmController } from './core/fsm.js';
+import { speak } from './tts.js';
+import { STT } from './stt.js';
 
 async function bootstrap() {
-  // Inicializa FSM y UI
   const fsm = new FsmController();
   UI.init(fsm);
 
-  // Configura reconocimiento de voz
   let stt: STT;
   try {
     stt = new STT();
   } catch (err) {
-    console.error('STT initialization failed:', err);
+    console.error('STT init failed:', err);
     UI.showError('Reconocimiento de voz no soportado');
     return;
   }
 
-  // Maneja resultados de STT
   stt.onResult(async (text: string) => {
-    console.log('User said:', text);
     UI.addBubble('user', text);
-
-    // Detén escucha mientras procesas
     stt.stop();
 
+    let aiResponse: string;
     try {
-      // Envía al FSM / GPT y obtiene respuesta
-      const aiResponse = await fsm.handle({ type: 'user_said', text });
-      console.log('AI response:', aiResponse);
+      aiResponse = await fsm.handle({ type: 'user_said', text });
       UI.addBubble('ai', aiResponse);
       await speak(aiResponse);
-    } catch (err) {
-      console.error('Error processing AI response:', err);
-      UI.showError('Error al procesar la respuesta de la IA');
+    } catch (e) {
+      console.error(e);
+      UI.showError('Error procesando la IA');
     } finally {
-      // Reinicia escucha
       stt.start();
     }
   });
 
-  // Conecta botones de la UI
-  UI.onMicButton(() => {
-    console.log('Mic button clicked');
-    stt.start();
-  });
-
-  UI.onStopButton(() => {
-    console.log('Stop button clicked');
-    stt.stop();
-  });
-
-    // Unregister SW in development and register only in production
-  if ('serviceWorker' in navigator) {
-    if (import.meta.env.DEV) {
-      navigator.serviceWorker.getRegistrations()
-        .then(regs => regs.forEach(reg => reg.unregister()))
-        .catch(err => console.error('Error unregistering SW:', err));
-    }
-    if (import.meta.env.PROD) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => console.log('SW registered'))
-        .catch(err => console.error('SW registration failed:', err));
-    }
-  }
+  UI.onMicButton(() => stt.start());
+  UI.onStopButton(() => stt.stop());
 }
 
 bootstrap();
