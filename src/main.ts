@@ -1,16 +1,14 @@
 // src/main.ts
-import UI from './ui/index.js';
-import { FsmController } from './core/fsm.js';
-import { speak } from './tts.js';
-import { STT } from './stt.js';
+import UI from './ui.ts';
+import { FsmController } from './core/fsm.ts';
+import { speak } from './tts.ts';
+import { STT } from './stt.ts';
 
 async function bootstrap() {
-  // Inicializa FSM y UI
   const fsm = new FsmController();
   UI.init(fsm);
 
-  // Configura STT sin worker
-  let stt;
+  let stt: STT;
   try {
     stt = new STT();
   } catch (err) {
@@ -19,8 +17,7 @@ async function bootstrap() {
     return;
   }
 
-  // Maneja resultados de reconocimiento
-  stt.onResult(async (text) => {
+  stt.onResult(async (text: string) => {
     UI.addBubble('user', text);
     stt.stop();
 
@@ -36,7 +33,6 @@ async function bootstrap() {
     }
   });
 
-  // Conecta botones
   UI.onMicButton(() => stt.start());
   UI.onStopButton(() => stt.stop());
 }
