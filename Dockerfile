@@ -16,11 +16,15 @@ RUN npm run build
 FROM node:18-alpine AS runner
 WORKDIR /app
 COPY package.json ./
-# instalamos solo deps de producción
+# instalamos solo deps de producción, sin ejecutar hooks
 RUN npm install --production --ignore-scripts
-# copiamos la carpeta dist compilada
+
+# copiamos la carpeta dist compilada desde el builder
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 4173
-CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
+# Exponemos el puerto dinámico que suministra Railway vía $PORT
+EXPOSE $PORT
+
+# Arrancamos con el script "start" del package.json, que usa $PORT
+CMD ["npm", "start"]
 
