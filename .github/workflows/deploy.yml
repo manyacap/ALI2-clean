@@ -1,0 +1,26 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Hacemos checkout del repo
+      - uses: actions/checkout@v4
+
+      # 2. Instalamos Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Instalamos deps y hacemos build
+      - run: npm ci
+      - run: npm run build
+
+      # 4. Desplegamos con Railway
+      - uses: railway/action@v1
+        with:
+          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
