@@ -1,55 +1,31 @@
 {
   "name": "alicia-ia",
   "version": "7.3.0",
+  "description": "Alicia IA – Chat PWA con STT, TTS y Service Worker",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm run typecheck && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "start": "serve dist",
+    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
-    "lint:fix": "eslint --fix \"src/**/*.{js,ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{js,ts,css,html,json}\"",
-    "format:check": "prettier --check \"src/**/*.{js,ts,css,html,json}\"",
-    "check": "npm run typecheck && npm run lint && npm run format:check",
-    "generate-sw": "node build-sw.mjs",
-    "predeploy": "npm run generate-sw",
-    "clean": "rimraf dist",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint \"src/**/*.{ts,js}\"",
+    "format": "prettier --write \"src/**/*.{ts,js,css,html}\""
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.8",
-    "comlink": "^4.4.1",
-    "idb": "^7.1.1",
-    "lottie-web": "^5.10.4",
-    "serve": "^14.2.4",
-    "workbox-window": "^7.0.0"
+    "comlink": "^4.4.2",
+    "workbox-precaching": "^7.0.0",
+    "workbox-routing": "^7.0.0",
+    "workbox-strategies": "^7.0.0"
   },
   "devDependencies": {
-    "@types/dom-speech-recognition": "^0.0.1",
-    "@types/web": "^0.0.100",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-import": "^2.29.1",
-    "husky": "^8.0.0",
-    "lint-staged": "^15.5.1",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint": "^8.40.0",
+    "husky": "^8.0.2",
     "prettier": "^2.8.8",
-    "rimraf": "^5.0.0",
-    "typescript": "^5.2.2",
-    "vite": "^4.4.9",
-    "workbox-build": "^7.3.0",
-    "workbox-cli": "^7.3.0"
-  },
-  "lint-staged": {
-    "src/**/*.{js,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "src/**/*.{css,html,json}": [
-      "prettier --write"
-    ]
+    "typescript": "^4.9.5",
+    "vite": "^4.5.13",
+    "workbox-cli": "^6.5.4"
   }
 }

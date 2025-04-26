@@ -1,40 +1,60 @@
-// src/main.ts
-import UI from './ui.ts';
-import { FsmController } from './core/fsm.ts';
-import { speak } from './tts.ts';
-import { STT } from './stt.ts';
+// src/ui.ts
+import ChatBubble from './components/ChatBubble.js';
 
-async function bootstrap() {
-  const fsm = new FsmController();
-  UI.init(fsm);
+/**
+ * Rol del emisor del mensaje en la UI.
+ */
+export type Role = 'user' | 'assistant';
 
-  let stt: STT;
-  try {
-    stt = new STT();
-  } catch (err) {
-    console.error('STT init failed:', err);
-    UI.showError('Reconocimiento de voz no soportado');
-    return;
-  }
-
-  stt.onResult(async (text: string) => {
-    UI.addBubble('user', text);
-    stt.stop();
-
-    try {
-      const aiResponse = await fsm.handle({ type: 'user_said', text });
-      UI.addBubble('ai', aiResponse);
-      await speak(aiResponse);
-    } catch (e) {
-      console.error('Error processing AI response:', e);
-      UI.showError('Error procesando la IA');
-    } finally {
-      stt.start();
+/**
+ * Módulo de UI para manejar la interacción del chat.
+ */
+const UI = {
+  /**
+   * Añade una burbuja de chat al contenedor.
+   * @param role - 'user' o 'assistant'
+   * @param text - Texto a mostrar
+   */
+  addBubble: (role: Role, text: string): void => {
+    const container = document.getElementById('chat-container');
+    if (!container) {
+      console.error('UI.addBubble: no se encontró #chat-container');
+      return;
     }
-  });
+    const bubble = ChatBubble({ role, message: text });
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+  },
 
-  UI.onMicButton(() => stt.start());
-  UI.onStopButton(() => stt.stop());
-}
+  /**
+   * Limpia el contenido del chat.
+   */
+  clearChat: (): void => {
+    const container = document.getElementById('chat-container');
+    if (container) container.innerHTML = '';
+  },
 
-bootstrap();
+  /**
+   * Muestra un indicador de loading mientras la IA responde.
+   */
+  showLoading: (): void => {
+    const container = document.getElementById('chat-container');
+    if (!container) return;
+    const loader = document.createElement('div');
+    loader.id = 'chat-loader';
+    loader.className = 'chat-loading';
+    loader.textContent = 'Alicia está escribiendo...';
+    container.appendChild(loader);
+    container.scrollTop = container.scrollHeight;
+  },
+
+  /**
+   * Elimina el indicador de loading.
+   */
+  hideLoading: (): void => {
+    const loader = document.getElementById('chat-loader');
+    if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+  }
+};
+
+export default UI;

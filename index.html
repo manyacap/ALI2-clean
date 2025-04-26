@@ -7,6 +7,7 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Alicia IA</title>
+Updated upstream
     <!-- Aquí tus otros <link> y <script type="module" src="..."> de Vite -->
     <script type="module" src="/src/main.ts"></script>
   </head>
@@ -15,10 +16,28 @@
 
     <!-- ===== Servicio Worker: registro ===== -->
     <script>
+
+    <link rel="stylesheet" href="/assets/index.css" />
+  </head>
+  <body>
+    <main>
+      <div id="chat-container" class="chat-container"></div>
+      <div id="error-msg" class="error"></div>
+      <div class="controls">
+        <button id="mic-btn">🎤 Hablar</button>
+        <button id="stop-btn">⏹️ Parar</button>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Registro del Service Worker
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker
             .register('/sw.js')
+Updated upstream
             .then(reg => {
               console.log('✅ Service Worker registrado:', reg.scope);
             })
@@ -28,6 +47,13 @@
         });
       }
     </script>
-    <!-- ====================================== -->
+    
+
+            .then(reg => console.log('✅ SW registrado:', reg.scope))
+            .catch(err => console.error('❌ SW error:', err));
+        });
+      }
+    </script>
+
   </body>
 </html>

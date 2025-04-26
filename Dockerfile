@@ -1,18 +1,26 @@
-# Dockerfile
-FROM node:18-alpine
+# Dockerfile multi-stage para Alicia IA
 
-# Donde trabajamos
+# 1) deps: instala dependencias (sin usar package-lock.json)
+FROM node:18-alpine AS deps
 WORKDIR /app
+COPY package.json ./
+RUN npm install --legacy-peer-deps
 
-# 1) Copiamos sólo las defs de dependencias e instalamos
-COPY package*.json ./
-RUN npm install --legacy-peer-deps --verbose
-
-# 2) Copiamos el resto del código
+# 2) builder: compila la aplicación
+FROM deps AS builder
+WORKDIR /app
 COPY . .
+RUN npm run build
 
-# 3) Ejecutamos el build con salida detallada
-RUN npm run build --verbose
+# 3) runner: sirve la build en producción
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY package.json ./
+# instalamos solo deps de producción
+RUN npm install --production --ignore-scripts
+# copiamos la carpeta dist compilada
+COPY --from=builder /app/dist ./dist
 
-# 4) Comando por defecto al arrancar el contenedor
-CMD ["npm", "run", "preview"]
+EXPOSE 4173
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
+

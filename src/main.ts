@@ -1,51 +1,48 @@
-// src/main.ts
-import UI from './ui.ts';
-import { FsmController } from './core/fsm.ts';
-import { speak } from './tts.ts';
-import { STT } from './stt.ts';
+import UI, { Role } from './ui.js';
+import { STT } from './stt.js';
+import * as tts from './tts.js';
+import FsmController from './core/fsm.js';
 
-async function bootstrap() {
+/**
+ * Muestra y registra errores en la UI.
+ */
+function showError(message: string): void {
+  console.error(message);
+  UI.addBubble('assistant', `❌ ${message}`);
+}
+
+(async () => {
+  // Instancias de FSM y reconocimiento de voz
   const fsm = new FsmController();
-  UI.init(fsm);
+  const recognizer = new STT();
 
-  let stt: STT;
-  try {
-    stt = new STT();
-  } catch (err) {
-    console.error('STT init failed:', err);
-    UI.showError('Reconocimiento de voz no soportado');
-    return;
+  // Inicia la UI
+  UI.clearChat();
+  UI.addBubble('assistant', 'Hola, soy Alicia. ¿En qué puedo ayudarte?');
+
+  // Botones de micrófono y paro
+  const micBtn = document.getElementById('mic-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  if (micBtn && stopBtn) {
+    micBtn.addEventListener('click', () => recognizer.start());
+    stopBtn.addEventListener('click', () => recognizer.stop());
+  } else {
+    showError('Botones de micrófono o detener no encontrados');
   }
 
-  stt.onResult(async (text: string) => {
-    UI.addBubble('user', text);
-    stt.stop();
+  // Maneja el resultado de STT
+  recognizer.onResult(async (transcript: string) => {
+    UI.addBubble('user', transcript);
+    UI.showLoading();
 
     try {
-      const aiResponse = await fsm.handle({ type: 'user_said', text });
-      UI.addBubble('ai', aiResponse);
-      await speak(aiResponse);
-    } catch (e) {
-      console.error('Error procesando la IA:', e);
-      UI.showError('Error procesando la IA');
-    } finally {
-      stt.start();
+      const aiResponse = await fsm.handle({ type: 'user_said', text: transcript });
+      UI.hideLoading();
+      UI.addBubble('assistant', aiResponse);
+      tts.speak(aiResponse);
+    } catch {
+      UI.hideLoading();
+      showError('Error procesando la IA');
     }
   });
-
-  UI.onMicButton(() => stt.start());
-  UI.onStopButton(() => stt.stop());
-}
-
-// Registra el Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then(reg => console.log('SW registered with scope:', reg.scope))
-      .catch(err => console.error('SW registration failed:', err));
-  });
-}
-
-bootstrap();
-
+})();

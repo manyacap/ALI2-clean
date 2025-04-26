@@ -1,14 +1,30 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "nodenext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
-    "moduleResolution": "nodenext",
+    "module": "ESNext",
+    "moduleResolution": "node16",
+    "strict": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "types": ["dom", "dom-speech-recognition"]
+    "allowJs": true,
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable",
+      "WebWorker"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "src/types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

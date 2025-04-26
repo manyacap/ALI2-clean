@@ -1,37 +1,80 @@
-body {
+/* src/style.css */
+
+/* Reset básico */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Contenedor general */
+body {
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background: #fafafa;
 }
-.messages {
+
+/* Chat container */
+#chat-container {
   flex: 1;
-  overflow-y: auto;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  scrollbar-width: none; /* Firefox */
 }
-.message {
-  padding: 0.5rem 1rem;
+#chat-container::-webkit-scrollbar {
+  display: none;       /* Chrome/Safari */
+}
+
+/* Burbujas de chat */
+.chat-bubble {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
   border-radius: 1rem;
-  margin: 0.5rem 0;
-  max-width: 70%;
+  line-height: 1.4;
+  word-wrap: break-word;
 }
-.user {
-  background: #dcf8c6;
+.chat-bubble.user {
+  background-color: #daf1ff;
   align-self: flex-end;
 }
-.bot {
-  background: #fff;
+.chat-bubble.assistant {
+  background-color: #f1f0f0;
   align-self: flex-start;
 }
-.start-btn {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 999px;
-  background: #007bff;
-  color: #fff;
+
+/* Controles de micrófono */
+.controls {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem;
+  background: #fff;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
+.controls button {
+  all: unset;
   cursor: pointer;
+  font-size: 1.75rem;
+  margin: 0 1rem;
+  line-height: 1;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .chat-bubble {
+    max-width: 90%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  .controls button {
+    font-size: 2rem;
+    margin: 0 0.75rem;
+  }
 }
