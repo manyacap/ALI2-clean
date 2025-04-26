@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy to Railway
 
 on:
@@ -8,19 +9,21 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Hacemos checkout del repo
+      # 1. Checkout the repository
       - uses: actions/checkout@v4
 
-      # 2. Instalamos Node.js
+      # 2. Setup Node.js
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. Instalamos deps y hacemos build
+      # 3. Install dependencies and build
       - run: npm ci
       - run: npm run build
 
-      # 4. Desplegamos con Railway
-      - uses: railway/action@v1
+      # 4. Deploy to Railway using the official action
+      - name: Deploy to Railway
+        uses: bervProject/railway-deploy@main
         with:
-          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          project_id:    ${{ secrets.RAILWAY_PROJECT_ID }}
