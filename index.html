@@ -1,22 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alicia IA</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-    #app { width: 100%; max-width: 600px; height: 60vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
-    button { margin: 0 5px; padding: 10px 20px; font-size: 1rem; }
-  </style>
-</head>
-<body>
-  <div id="app"></div>
-  <div>
-    <button id="mic-btn">🎤 Iniciar</button>
-    <button id="stop-btn">⏹ Detener</button>
-  </div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Alicia IA</title>
+    <!-- Aquí tus otros <link> y <script type="module" src="..."> de Vite -->
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- ===== Servicio Worker: registro ===== -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then(reg => {
+              console.log('✅ Service Worker registrado:', reg.scope);
+            })
+            .catch(err => {
+              console.error('❌ Fallo al registrar el SW:', err);
+            });
+        });
+      }
+    </script>
+    <!-- ====================================== -->
+  </body>
 </html>
