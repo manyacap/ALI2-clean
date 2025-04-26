@@ -22,5 +22,4 @@ jobs:
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service:       ${{ secrets.RAILWAY_PROJECT_ID }}
-          # detach:    false   # opcional, si no quieres esperar a que termine el deploy
+          detach: false
