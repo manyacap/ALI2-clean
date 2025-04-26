@@ -23,23 +23,25 @@
     "comlink": "^4.4.1",
     "idb": "^7.1.1",
     "lottie-web": "^5.10.4",
-    "workbox-window": "^7.0.0",
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "workbox-window": "^7.0.0"
   },
   "devDependencies": {
     "@types/dom-speech-recognition": "^0.0.1",
     "@types/web": "^0.0.100",
-    "typescript": "^5.2.2",
-    "vite": "^4.4.9",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.29.1",
     "eslint-config-prettier": "^8.10.0",
-    "prettier": "^2.8.8",
-    "workbox-build": "^7.0.0",
-    "rimraf": "^5.0.0",
+    "eslint-plugin-import": "^2.29.1",
     "husky": "^8.0.0",
-    "lint-staged": "^15.5.1"
+    "lint-staged": "^15.5.1",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "workbox-build": "^7.3.0",
+    "workbox-cli": "^7.3.0"
   },
   "lint-staged": {
     "src/**/*.{js,ts,tsx}": [
