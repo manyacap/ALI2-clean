@@ -9,21 +9,18 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repository
       - uses: actions/checkout@v4
 
-      # 2. Setup Node.js
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. Install dependencies and build
       - run: npm ci
       - run: npm run build
 
-      # 4. Deploy to Railway using the official action
       - name: Deploy to Railway
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          project_id:    ${{ secrets.RAILWAY_PROJECT_ID }}
+          service:       ${{ secrets.RAILWAY_PROJECT_ID }}
+          # detach:    false   # opcional, si no quieres esperar a que termine el deploy
