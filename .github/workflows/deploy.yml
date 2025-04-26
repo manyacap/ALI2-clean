@@ -22,4 +22,6 @@ jobs:
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service:       ALI2-clean        # ← aquí pon el nombre exacto de tu service
           detach: false
+
