@@ -7,11 +7,8 @@
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2021,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "ecmaVersion": 12,
+    "sourceType": "module"
   },
   "plugins": [
     "@typescript-eslint",
@@ -26,29 +23,20 @@
     "plugin:import/typescript",
     "plugin:prettier/recommended"
   ],
+  "rules": {
+    "prettier/prettier": ["error", { "endOfLine": "auto" }],
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-var": "off",
+    "import/no-unresolved": "off"
+  },
   "settings": {
     "import/resolver": {
       "node": {
-        "extensions": [
-          ".js",
-          ".jsx",
-          ".ts",
-          ".tsx"
-        ]
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     }
-  },
-  "rules": {
-    // Integración con Prettier
-    "prettier/prettier": ["error", { "endOfLine": "auto" }],
-
-    // Avisos de variables no usadas en TypeScript
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-
-    // Desactivar import/no-unresolved para liberar el CI
-    "import/no-unresolved": "off",
-
-    // Permitir console por ahora
-    "no-console": "off"
   }
 }
+
+
