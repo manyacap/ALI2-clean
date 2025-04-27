@@ -9,12 +9,13 @@
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{js,ts,jsx,tsx,css,html,json,md}\"",
     "lint": "npm run format && eslint \"src/**/*.{js,ts}\" --fix",
-    "lint:ci": "eslint \"src/**/*.{js,ts}\"",
+    "lint:ci": "eslint \"src/**/*.{js,ts}\"",       // sin --fix para CI
+    "typecheck": "tsc --noEmit",                     // <-- lo que faltaba
     "prepare": "husky install"
   },
   "dependencies": {
     "@pkgr/core": "^0.2.4",
-    "comlink": "^4.3.0",
+    "comlink": "^4.5.0",
     "fast-diff": "^1.3.0",
     "lottie-web": "^5.9.4",
     "prettier-linter-helpers": "^1.0.0",
@@ -32,10 +33,9 @@
     "import-fresh": "^3.3.0",
     "minimatch": "^9.0.5",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.8",
+    "prettier": "^2.8.8",      // fijamos a 2.x para compatibilidad
     "rimraf": "^5.0.10",
-    "vite": "^4.0.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",    // asegúrate de usar un TS soportado (<5.4.0) o baja la versión
+    "vite": "^4.4.9"
   }
 }
-
