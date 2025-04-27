@@ -1,7 +1,13 @@
 {
   "build": {
-    "nixpacks": {
-      "nodeVersion": "18.x"
-    }
+    "path": ".",
+    "commands": [
+      "npm ci",
+      "npm run build"
+    ]
+  },
+  "deploy": {
+    "path": "dist",
+    "startCommand": "serve -s . -l $PORT"
   }
 }
