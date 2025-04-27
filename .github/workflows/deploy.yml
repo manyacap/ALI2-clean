@@ -7,40 +7,50 @@ on:
 
 jobs:
   build-and-push:
+    name: Build & Push Docker image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build --pull --no-cache -t alicia-ia:latest .
+        run: |
+          docker build --pull --no-cache -t alicia-ia:latest .
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push image to GHCR
+      - name: Push to GHCR
         run: |
           docker tag alicia-ia:latest ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
           docker push ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
 
   deploy:
+    name: Deploy to Railway
     needs: build-and-push
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Login to Railway
+        run: railway login ${{ secrets.RAILWAY_TOKEN }}
+
       - name: Deploy to Railway
-        uses: railwayapp/railway-deploy@v1
-        with:
-          apiKey:     ${{ secrets.RAILWAY_TOKEN }}
-          projectId:  ${{ secrets.RAILWAY_PROJECT_ID }}
-          serviceId:  ALI2-clean
-          image:      ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
-          detach:     true
+        run: |
+          railway up \
+            --project ${{ secrets.RAILWAY_PROJECT_ID }} \
+            --service ALI2-clean \
+            --image ghcr.io/${{ github.repository_owner }}/alicia-ia:latest \
+            --detach
+
