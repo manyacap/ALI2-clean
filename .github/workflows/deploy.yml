@@ -11,15 +11,14 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write  # para GHCR, si lo usas
+      id-token: write  # si subes a GHCR
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: |
-          docker build --pull --no-cache -t alicia-ia:latest .
+        run: docker build --pull --no-cache -t alicia-ia:latest .
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -41,8 +40,11 @@ jobs:
       - name: Deploy to Railway
         uses: railwayapp/railway-deploy@v1
         with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service: ALI2-clean
-          image: ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
-          detach: true
-
+          # credenciales de Railway (añádelos a tus Secrets)
+          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+          projectId:   ${{ secrets.RAILWAY_PROJECT_ID }}
+          serviceId:   ${{ secrets.RAILWAY_SERVICE_ID }}
+          # la imagen que acabas de empujar
+          image:       ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
+          # opcional: espera a que termine la despliegue antes de acabar
+          waitForDeployment: true
