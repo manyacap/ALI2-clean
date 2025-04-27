@@ -1,27 +1,48 @@
-# .github/workflows/deploy.yml
-name: Deploy to Railway
+name: Deploy to Railway via Docker
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # para GHCR, si lo usas
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Build Docker image
+        run: |
+          docker build --pull --no-cache -t alicia-ia:latest .
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          node-version: '18'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: npm ci
-      - run: npm run build
+      - name: Push to GHCR
+        run: |
+          docker tag alicia-ia:latest ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
+          docker push ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
 
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy to Railway
-        uses: bervProject/railway-deploy@main
+        uses: railwayapp/railway-deploy@v1
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service:       ALI2-clean        # ← aquí pon el nombre exacto de tu service
-          detach: false
+          service: ALI2-clean
+          image: ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
+          detach: true
 
