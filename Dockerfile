@@ -1,30 +1,35 @@
-# 1) deps: instala únicamente package.json
-FROM node:18-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+# Dockerfile multi-stage para Alicia IA
 
-# 2) builder: compila la aplicación
-FROM deps AS builder
+# 1) Builder: instala deps (sin scripts) y compila
+FROM node:18-alpine AS builder
 WORKDIR /app
+
+# Copiamos lock y manifest
+COPY package.json package-lock.json ./
+
+# Instalamos TODO (prod+dev) pero sin scripts para ahorrar memoria
+RUN npm ci --legacy-peer-deps --ignore-scripts --no-audit
+
+# Copiamos código y build
 COPY . .
 RUN npm run build
 
-# 3) runner: sirve la build en producción
+# 2) Runner: sólo deps de producción y artefactos compilados
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Instalamos solo deps de producción + install global de 'serve'
+# Copiamos sólo manifest para prod
 COPY package.json package-lock.json ./
-RUN npm ci --production --omit=dev && \
-    npm install --global serve
 
-# Copiamos la carpeta generada por el builder
+# Instalamos sólo prod (ignora scripts de prepare/husky)
+RUN npm ci --omit=dev --ignore-scripts --no-audit
+
+# Copiamos la build final
 COPY --from=builder /app/dist ./dist
 
-# Exponer el puerto que Railway inyecta en la variable $PORT
-EXPOSE $PORT
+# Exponemos puerto de Railway (Railway inyecta $PORT)
+EXPOSE 4173
 
-# Arrancar con 'npm start' (usa 'serve' para servir dist)
+# Usamos el start script de package.json (npm run preview con $PORT)
 CMD ["npm", "start"]
 
