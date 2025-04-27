@@ -1,4 +1,5 @@
-name: Deploy to Railway via Docker
+# .github/workflows/deploy.yml
+name: CI & Deploy
 
 on:
   push:
@@ -6,56 +7,63 @@ on:
       - main
 
 jobs:
-  build-and-push:
-    name: Build & Push Docker image
+  qa:
+    name: QA – install • lint • typecheck
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Build & push
-        uses: docker/build-push-action@v3
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+  build:
+    name: Build static assets
+    runs-on: ubuntu-latest
+    needs: qa
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
 
   deploy:
     name: Deploy to Railway
-    needs: build-and-push
     runs-on: ubuntu-latest
-    # pasamos el token y el projectId como variables de entorno
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-
+    needs: build
     steps:
+      - uses: actions/checkout@v3
+
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: npm install -g railway
 
-      - name: Deploy
+      - name: Deploy via Railway
+        env:
+          RAILWAY_TOKEN:      ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
         run: |
-          # El CLI toma el token de RAILWAY_TOKEN
-          # Usamos --projectId en lugar de --project
           railway up \
-            --projectId $RAILWAY_PROJECT_ID \
-            --service ALI2-clean \
-            --image ghcr.io/${{ github.repository_owner }}/alicia-ia:latest \
-            --detach
-
+            --project $RAILWAY_PROJECT_ID \
+            --token   $RAILWAY_TOKEN \
+            --yes \
+            --no-watch
