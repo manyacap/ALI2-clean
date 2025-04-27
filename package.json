@@ -5,19 +5,18 @@
   "type": "module",
   "scripts": {
     "prepare": "npx husky install",
-    "dev": "vite",
+    "dev": "npm exec vite",
     "typecheck": "tsc --noEmit",
-    "build": "npm run typecheck && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port $PORT",
+    "build": "npm run typecheck && npm exec vite build",
+    "preview": "npm exec vite preview --host 0.0.0.0 --port $PORT",
     "start": "npm run preview",
     "lint": "eslint \"src/**/*.{ts,js}\"",
     "format": "prettier --write \"src/**/*.{ts,js,css,html}\""
   },
   "dependencies": {
     "comlink": "^4.3.1",
-    "vite": "^4.5.13",
-    "workbox-precaching": "^7.0.0",
     "workbox-routing": "^7.0.0",
+    "workbox-precaching": "^7.0.0",
     "workbox-strategies": "^7.0.0"
   },
   "devDependencies": {
@@ -29,7 +28,9 @@
     "eslint-plugin-prettier": "^5.2.6",
     "husky": "^8.0.0",
     "prettier": "^2.8.8",
+    "rimraf": "^5.0.0",
     "typescript": "^5.0.4",
+    "vite": "^4.5.13",
     "workbox-cli": "^6.5.4"
   },
   "engines": {
