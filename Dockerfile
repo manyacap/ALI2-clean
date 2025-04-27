@@ -1,27 +1,37 @@
-# Etapa builder
+# Stage 1: builder — instala deps de prod y compila con Vite
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# 1) Copiamos sólo package.json (no el lockfile)
-COPY package.json ./
+# Copiamos sólo lo esencial para instalar deps
+COPY package.json package-lock.json ./
 
-# 2) Instalamos dependencias de producción
-RUN npm install --omit=dev --legacy-peer-deps --max-old-space-size=2048
+# Instalamos sólo prod deps, ignorando scripts (prepare/husky), y limitando heap
+RUN npm install \
+      --omit=dev \
+      --ignore-scripts \
+      --legacy-peer-deps \
+      --max-old-space-size=2048
 
-# 3) Copiamos el resto del código y compilamos
+# Copiamos todo el código y lanzamos el build de Vite
 COPY . .
 RUN npm run build
 
-
-# Stage 2: runner
-FROM node:18-alpine
+# Stage 2: runner — servidor minimalista
+FROM node:18-alpine AS runner
 WORKDIR /app
+
+# Copiamos artefactos de build y módulos de prod desde builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 
+# Variables de entorno y puerto
+ENV NODE_ENV=production
 ENV PORT=3000
-EXPOSE $PORT
+EXPOSE 3000
 
+# Instalamos un servidor estático ligero
 RUN npm install -g sirv
-CMD ["sirv", "dist", "--single", "--port", "$PORT"]
+
+# Arranca sirv sirviendo /dist en el puerto indicado
+CMD ["sirv", "dist", "--single", "--port", "3000"]
