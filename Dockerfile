@@ -1,35 +1,27 @@
-# Dockerfile multi-stage para Alicia IA
-
-# 1) Builder: instala deps (sin scripts) y compila
-FROM node:18-alpine AS builder
+# 1) deps: instala solo las deps necesarias para build (incluye devDeps)
+FROM node:18-alpine AS deps
 WORKDIR /app
-
-# Copiamos lock y manifest
+# Copiamos lockfile para asegurar reproducibilidad
 COPY package.json package-lock.json ./
+# Usamos npm install y deshabilitamos audit/log para ahorrar memoria
+RUN npm install --legacy-peer-deps --no-audit --loglevel=error
 
-# Instalamos TODO (prod+dev) pero sin scripts para ahorrar memoria
-RUN npm ci --legacy-peer-deps --ignore-scripts --no-audit
-
-# Copiamos código y build
+# 2) builder: compila la aplicación
+FROM deps AS builder
+WORKDIR /app
 COPY . .
+# Reducimos el heap de Node para que no reviente en memoria
+ENV NODE_OPTIONS=--max_old_space_size=512
 RUN npm run build
 
-# 2) Runner: sólo deps de producción y artefactos compilados
+# 3) runner: sirve la build en producción
 FROM node:18-alpine AS runner
 WORKDIR /app
-
-# Copiamos sólo manifest para prod
+# Solo deps de producción (sin scripts)
 COPY package.json package-lock.json ./
-
-# Instalamos sólo prod (ignora scripts de prepare/husky)
-RUN npm ci --omit=dev --ignore-scripts --no-audit
-
-# Copiamos la build final
+RUN npm ci --production --ignore-scripts --no-audit --loglevel=error
 COPY --from=builder /app/dist ./dist
 
-# Exponemos puerto de Railway (Railway inyecta $PORT)
-EXPOSE 4173
-
-# Usamos el start script de package.json (npm run preview con $PORT)
+# EXPONE el puerto dinámico de Railway
+EXPOSE $PORT
 CMD ["npm", "start"]
-
