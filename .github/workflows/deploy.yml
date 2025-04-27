@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Deploy to Railway via Docker
 
 on:
@@ -12,24 +11,24 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write  # si necesitas GHCR
+      id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build Docker image
         run: |
           docker build --pull --no-cache -t alicia-ia:latest .
 
-      - name: Log in to GHCR
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push to GHCR
+      - name: Push image to GHCR
         run: |
           docker tag alicia-ia:latest ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
           docker push ghcr.io/${{ github.repository_owner }}/alicia-ia:latest
@@ -40,15 +39,15 @@ jobs:
 
     steps:
       - name: Install Railway CLI
-        run: npm install -g railway
+        run: npm install -g @railway/cli
 
       - name: Login to Railway
         run: railway login --apiKey ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy to Railway
         run: |
-          # despliega con la última imagen de GHCR al servicio ALI2-clean
           railway up \
+            --project ${{ secrets.RAILWAY_PROJECT_ID }} \
             --service ALI2-clean \
             --image ghcr.io/${{ github.repository_owner }}/alicia-ia:latest \
             --detach
